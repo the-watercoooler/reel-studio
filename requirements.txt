@@ -1,0 +1,4 @@
+pillow>=10.0
+numpy>=1.26
+# optional: develops raw .DNG photos at full size (only used for a trip index made with library.json)
+# rawpy

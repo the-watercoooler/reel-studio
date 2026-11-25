@@ -1,0 +1,588 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Carousel Studio</title>
+<style>
+:root{--bg:#0e0e10;--panel:#17171a;--panel2:#1f1f23;--panel3:#29292e;--line:#2b2b30;--ink:#ececf0;--muted:#9494a0;
+  --accent:#23d4c4;--accent-ink:#03110f;--violet:#8b7bff;--warn:#f5b347}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.4 "Segoe UI",system-ui,sans-serif}
+body{display:grid;grid-template-rows:54px minmax(0,1fr);height:100vh;overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{background:var(--panel3);border:1px solid var(--line);border-radius:7px;padding:5px 11px;cursor:pointer;min-height:30px;white-space:nowrap}
+button:hover:not(:disabled){border-color:#4a4a52}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:650}
+button:disabled{opacity:.4;cursor:default}
+select,input[type=text],input[type=search]{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 8px;min-height:30px}
+input[type=range]{accent-color:var(--accent);width:100%}
+header{display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--line);min-width:0}
+.brand{font-weight:750;font-size:15px;white-space:nowrap}.brand b{color:var(--accent)}
+.spacer{flex:1}
+.lbl{color:var(--muted);font-size:12px}
+.meta{color:var(--muted);font-size:12px}
+.pill{font-size:12px;color:var(--muted);padding:3px 10px;border-radius:999px;background:var(--panel2);white-space:nowrap}
+a.nav{color:var(--muted);text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--line)}
+a.nav:hover{color:var(--ink)}
+#app{display:grid;grid-template-columns:340px minmax(0,1fr) 320px;min-height:0}
+aside{background:var(--panel);display:flex;flex-direction:column;min-height:0}
+#left{border-right:1px solid var(--line)}
+#right{border-left:1px solid var(--line);overflow-y:auto}
+.tabs{display:flex;gap:5px;padding:10px 10px 0}
+.tabs button{border-radius:999px;background:var(--panel2);min-height:28px;padding:3px 12px}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.head{padding:10px;display:flex;flex-direction:column;gap:7px;border-bottom:1px solid var(--line)}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--panel2);padding:4px 10px;min-height:28px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--panel3);border:1px solid transparent;cursor:pointer;min-height:0;line-height:1.5}
+.chip[aria-pressed=true]{background:var(--violet);color:#fff}
+.grid{flex:1;min-height:0;overflow-y:auto;padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:150px;gap:8px;align-content:start}
+.card{position:relative;height:150px;border-radius:7px;overflow:hidden;background:#000;cursor:pointer;outline:2px solid transparent;outline-offset:-2px}
+.card:hover{outline-color:var(--accent)}
+.card img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
+.card .b{position:absolute;font-size:10.5px;background:rgba(0,0,0,.72);padding:1px 5px;border-radius:3px;pointer-events:none}
+.card .br{right:4px;bottom:4px}.card .bl{left:4px;bottom:4px}.card .tl{left:4px;top:4px;background:var(--violet)}.card .tr{right:4px;top:4px;background:var(--warn);color:#000}
+.card .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 20px;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .12s;pointer-events:none}
+.card:hover .cap{opacity:1}
+.more{grid-column:1/-1;text-align:center;color:var(--muted);padding:6px}
+#stage{display:flex;flex-direction:column;min-height:0;padding:12px;gap:10px}
+.bigwrap{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;gap:14px}
+.big{position:relative;height:100%;aspect-ratio:4/5;max-width:100%;background:#000;border-radius:6px;box-shadow:0 0 0 1px var(--line);overflow:hidden}
+.big img{width:100%;height:100%;display:block}
+.nav-btn{width:40px;height:40px;border-radius:50%;padding:0;font-size:16px;flex:none}
+.box{position:absolute;border:2px dashed transparent;border-radius:3px;cursor:pointer}
+.box:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.05)}
+.box.sel{border:2px solid var(--accent);box-shadow:0 0 0 9999px rgba(0,0,0,.0)}
+.box.drop{border:3px solid var(--warn);background:rgba(245,179,71,.15)}
+.box .tag{position:absolute;left:6px;top:6px;font-size:11px;background:rgba(0,0,0,.72);padding:1px 7px;border-radius:4px;opacity:0;pointer-events:none;white-space:nowrap}
+.box:hover .tag,.box.sel .tag{opacity:1}
+#busy{position:absolute;right:10px;top:10px;font-size:11px;background:rgba(0,0,0,.75);color:var(--accent);padding:3px 9px;border-radius:999px}
+.strip{display:flex;gap:8px;overflow-x:auto;flex:none;padding:2px 2px 6px;align-items:flex-start}
+.thumb{position:relative;flex:none;width:112px;cursor:pointer}
+.thumb .im{position:relative;width:112px;height:140px;border-radius:4px;overflow:hidden;background:#000;outline:2px solid transparent}
+.thumb.cur .im{outline-color:var(--accent)}
+.thumb img{width:100%;height:100%;display:block}
+.thumb .n{font-size:11px;color:var(--muted);text-align:center;margin-top:2px}
+.thumb .box .tag{display:none}
+.striplbl{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.07em;flex:none}
+.addslide{flex:none;width:112px;height:140px;border:1px dashed #4a4a52;border-radius:4px;display:flex;align-items:center;justify-content:center;color:var(--muted);background:transparent}
+.sec{padding:12px 14px;border-bottom:1px solid var(--line)}
+.sec h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:650}
+.kv{display:grid;grid-template-columns:86px 1fr;gap:8px 10px;align-items:center}
+.hint{color:var(--muted);font-size:11.5px;margin:6px 0 0}
+.selph{display:flex;gap:10px;align-items:flex-start}
+.selph img{width:96px;height:96px;object-fit:cover;border-radius:5px;background:#000;flex:none}
+.field{display:flex;flex-direction:column;gap:4px;margin-bottom:8px}
+.field input{width:100%}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:9px;display:none;align-items:center;gap:10px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#toast button{background:transparent;color:var(--bg);border-color:rgba(0,0,0,.25);min-height:26px;padding:2px 9px}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;z-index:60}
+.modal .box2{background:var(--panel);border:1px solid #3a3a42;border-radius:12px;padding:14px;max-width:min(920px,94vw);max-height:92vh;display:flex;flex-direction:column;gap:10px}
+.lightimg{max-width:860px;max-height:68vh;object-fit:contain;background:#000;border-radius:6px;display:block}
+.lightvid{width:min(860px,88vw);max-height:62vh;background:#000;border-radius:6px;display:block}
+.modal .box2.tplbox{width:min(1400px,96vw);max-width:96vw;height:min(900px,92vh)}
+.tplgrid{flex:1;min-height:0;overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;align-content:start;padding:2px}
+.tpl{background:var(--panel2);border:2px solid transparent;border-radius:10px;padding:8px;cursor:pointer;display:flex;flex-direction:column;gap:6px}
+.tpl:hover{border-color:#4a4a52}
+.tpl.on{border-color:var(--accent)}
+.tpl img{width:100%;aspect-ratio:666/270;object-fit:cover;border-radius:6px;background:#000;display:block}
+.tpl b{font-size:13.5px}
+.tpl .meta{font-size:11.5px;line-height:1.35}
+[hidden]{display:none !important}
+#loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:100;color:var(--muted);font-size:15px}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Carousel <b>Studio</b></div>
+  <select id="pick" aria-label="Carousel" style="max-width:260px"></select>
+  <span class="pill" id="fmtLbl"></span>
+  <span class="lbl">Colour</span>
+  <select id="lookSel" aria-label="Colour look" style="max-width:150px"></select>
+  <input type="range" id="lookAmt" min="0" max="1" step="0.01" style="width:90px" title="Look strength">
+  <button id="undo" title="Undo (Ctrl+Z)">↶</button><button id="redo" title="Redo (Ctrl+Y)">↷</button>
+  <button id="tplBtn" title="Browse all templates, or try this carousel's photos in another template">✦ Templates</button>
+  <button id="saveVer" title="Keep a copy of the carousel as it is now, to compare later">Save version</button>
+  <select id="cmpSel" title="Show a saved version under the current one"><option value="">Compare with…</option></select>
+  <span class="spacer"></span>
+  <span class="pill" id="saveState">Saved</span>
+  <button id="openPhotos" title="Open this carousel's photos folder (edit them in any app, then save)">📁 Photos folder</button>
+  <button class="primary" id="finalise" title="Make the full-size slides 01.jpg, 02.jpg … in the carousel's folder">Finalise</button>
+  <a class="nav" href="/" title="Back to Reel Studio">Reels →</a>
+</header>
+<div id="app">
+  <aside id="left">
+    <div class="tabs"><button data-t="lib" aria-pressed="true">All photos &amp; videos</button><button data-t="mine" aria-pressed="false">This carousel</button></div>
+    <div class="head" id="libHead">
+      <input type="search" id="q" placeholder="Search: lake, church, Paris, sunset…">
+      <div class="row"><select id="loc" style="flex:1;min-width:0"></select>
+        <div class="seg" id="orient"><button data-v="all" aria-pressed="true">All</button><button data-v="portrait" aria-pressed="false" title="Portrait">▯</button><button data-v="landscape" aria-pressed="false" title="Landscape">▭</button></div></div>
+      <div class="seg" id="kind" style="align-self:flex-start"><button data-v="photo" aria-pressed="true">📷 Photos</button><button data-v="video" aria-pressed="false">🎬 Video frames</button><button data-v="all" aria-pressed="false">Both</button></div>
+      <div class="chips" id="tagChips"></div>
+      <div class="lbl" id="libCount"></div>
+    </div>
+    <div class="head" id="mineHead" hidden>
+      <div class="meta">The photos in this carousel's folder. Edit any of them in another app and save it there: the carousel updates by itself.</div>
+      <div class="row"><button id="openPhotos2">📁 Open the photos folder</button></div>
+    </div>
+    <div class="grid" id="grid"></div>
+  </aside>
+  <section id="stage">
+    <div class="bigwrap">
+      <button class="nav-btn" id="prev" title="Previous slide (←)">◀</button>
+      <div class="big" id="big"><img id="bigImg" alt=""><div id="bigBoxes"></div><span id="busy" hidden>updating…</span></div>
+      <button class="nav-btn" id="next" title="Next slide (→)">▶</button>
+    </div>
+    <div class="row" style="justify-content:space-between"><span class="striplbl" id="slideLbl"></span><span class="meta">Drag photos onto any photo spot · drag one spot onto another to swap</span></div>
+    <div class="strip" id="strip"></div>
+    <div id="cmpWrap" hidden><div class="row" style="justify-content:space-between"><span class="striplbl" id="cmpLbl"></span><button id="restoreVer">Go back to this version</button></div><div class="strip" id="cmpStrip"></div></div>
+  </section>
+  <aside id="right"></aside>
+</div>
+<div id="toast"></div>
+<div id="loading">Loading Carousel Studio…</div>
+
+<script>
+const $ = q => document.querySelector(q);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const TAGS = ['Scenery','Water','City','Landmark','Walking','People','Selfie','Food','Transport','Indoor','Night','Sunset','Detail','Animals'];
+const isPhoto = c => c && c.kind === 'photo';
+const pad = (n, w) => String(n).padStart(w, '0');
+async function api(url, body) {
+  const r = await fetch(url, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+let toastT;
+function toast(html, ms = 2800) { const t = $('#toast'); t.innerHTML = html; t.style.display = 'flex'; clearTimeout(toastT); if (ms) toastT = setTimeout(() => t.style.display = 'none', ms); }
+
+const C = {list:[], formats:{}, looks:[], lib:[], byId:{}, name:null, spec:null, photos:[], r:null, slide:0, sel:null, hist:[], fut:[], tab:'lib', cmp:null};
+const LF = {q:'', loc:'all', orient:'all', kind:'photo', tags:new Set(), shown:120};
+
+// ------------------------------------------------------------------ open / save / history
+async function openCarousel(name) {
+  const d = await api('/api/carousel/get?name=' + encodeURIComponent(name));
+  C.name = name; C.spec = d.spec; C.photos = d.photos; C.slide = 0; C.sel = null; C.hist = []; C.fut = []; C.cmp = null;
+  try { localStorage.setItem('cs-last', name); } catch (e) {}
+  renderPick(); renderHeader(); renderLeft(); renderRight(); renderCmpSel(); $('#cmpWrap').hidden = true;
+  queueRender(0);
+}
+const snap = () => JSON.stringify(C.spec);
+function pushHist() { C.hist.push(snap()); if (C.hist.length > 150) C.hist.shift(); C.fut = []; updUndo(); }
+function updUndo() { $('#undo').disabled = !C.hist.length; $('#redo').disabled = !C.fut.length; }
+function undo() { if (!C.hist.length) return; C.fut.push(snap()); C.spec = JSON.parse(C.hist.pop()); changed(); updUndo(); }
+function redo() { if (!C.fut.length) return; C.hist.push(snap()); C.spec = JSON.parse(C.fut.pop()); changed(); updUndo(); }
+let saveT = 0;
+function changed(noRender) {
+  C.slide = clamp(C.slide, 0, C.spec.slides.length - 1);
+  if (C.sel && (!C.spec.slides[C.sel.slide] || C.sel.i >= C.spec.slides[C.sel.slide].photos.length)) C.sel = null;
+  $('#saveState').textContent = 'Saving…'; clearTimeout(saveT); saveT = setTimeout(save, 500);
+  renderHeader(); renderRight(); if (C.tab === 'mine') renderLeft();
+  if (!noRender) queueRender();
+}
+async function save() {
+  try { const r = await api('/api/carousel/save', {name: C.name, spec: C.spec}); $('#saveState').textContent = 'All changes saved'; }
+  catch (e) { $('#saveState').textContent = 'Not saved: ' + e.message; }
+}
+
+// ------------------------------------------------------------------ rendering (the server draws the slides with the same code as the final export)
+let renderSeq = 0, renderT = 0;
+function queueRender(delay = 220) { clearTimeout(renderT); $('#busy').hidden = false; renderT = setTimeout(doRender, delay); }
+async function doRender() {
+  const seq = ++renderSeq;
+  try {
+    const r = await api('/api/carousel/render', {name: C.name, spec: C.spec});
+    if (seq !== renderSeq) return;
+    C.r = r; drawStage();
+  } catch (e) { toast('Could not draw the slides: ' + esc(e.message)); }
+  if (seq === renderSeq) $('#busy').hidden = true;
+}
+function boxHtml(b, small) {
+  const [x0, y0, x1, y1] = b.rect, sl = C.spec.slides[b.slide], k = C.formats[C.spec.format].kinds[sl.kind];
+  const sel = C.sel && C.sel.slide === b.slide && C.sel.i === b.i;
+  const label = k.photos[b.i] + (sl.photos[b.i] ? '' : ' (empty)');
+  return `<div class="box ${sel ? 'sel' : ''}" draggable="${sl.photos[b.i] ? 'true' : 'false'}" data-slide="${b.slide}" data-i="${b.i}" title="${esc(label)}${sl.photos[b.i] ? ' — ' + esc(sl.photos[b.i].file) : ''}"
+    style="left:${x0 / 10.8}%;top:${y0 / 13.5}%;width:${(x1 - x0) / 10.8}%;height:${(y1 - y0) / 13.5}%;${b.rot ? `transform:rotate(${-b.rot}deg)` : ''}">${small ? '' : `<span class="tag">${esc(label)}</span>`}</div>`;
+}
+function drawStage() {
+  if (!C.r) return;
+  const n = C.r.slides.length; C.slide = clamp(C.slide, 0, n - 1);
+  $('#bigImg').src = C.r.slides[C.slide];
+  $('#bigBoxes').innerHTML = (C.r.boxes[C.slide] || []).map(b => boxHtml(b, false)).join('');
+  $('#slideLbl').textContent = `Slide ${C.slide + 1} of ${n} · ${C.formats[C.spec.format].kinds[C.spec.slides[C.slide].kind].label}`;
+  $('#strip').innerHTML = C.r.slides.map((u, i) => `<div class="thumb ${i === C.slide ? 'cur' : ''}" data-s="${i}"><div class="im"><img src="${u}" alt="">${(C.r.boxes[i] || []).map(b => boxHtml(b, true)).join('')}</div><div class="n">${i + 1}</div></div>`).join('') +
+    `<button class="addslide" id="addSlide" title="Add a slide after the current one">＋ slide</button>`;
+  $('#prev').disabled = C.slide === 0; $('#next').disabled = C.slide >= n - 1;
+  const cur = $('#strip .thumb.cur'); if (cur) cur.scrollIntoView({block: 'nearest', inline: 'nearest'});
+}
+function goSlide(i) { C.slide = clamp(i, 0, C.spec.slides.length - 1); drawStage(); renderRight(); }
+
+// ------------------------------------------------------------------ header
+function renderPick() {
+  $('#pick').innerHTML = C.list.map(c => `<option value="${esc(c.name)}" ${c.name === C.name ? 'selected' : ''}>${esc(c.name)}</option>`).join('') +
+    '<option value="__new">＋ New carousel…</option>';
+}
+function renderHeader() {
+  $('#fmtLbl').textContent = C.formats[C.spec.format].label;
+  $('#lookSel').innerHTML = C.looks.map(L => `<option value="${L.key}" ${L.key === C.spec.look.grade ? 'selected' : ''}>${esc(L.label)}</option>`).join('');
+  if (document.activeElement !== $('#lookAmt')) $('#lookAmt').value = C.spec.look.amt;
+  updUndo();
+}
+function renderCmpSel() {
+  const v = C.spec.versions || [];
+  $('#cmpSel').innerHTML = '<option value="">Compare with…</option>' + v.map((x, i) => `<option value="${i}">${esc(x.label)}</option>`).join('');
+}
+
+// ------------------------------------------------------------------ right panel: the selected photo spot + the current slide
+function renderRight() {
+  const sl = C.spec.slides[C.slide], F = C.formats[C.spec.format], K = F.kinds[sl.kind];
+  let h = '';
+  if (C.sel) {
+    const s2 = C.spec.slides[C.sel.slide], ph = s2.photos[C.sel.i], lbl = F.kinds[s2.kind].photos[C.sel.i];
+    h += `<div class="sec"><h3>Selected: ${esc(lbl)} · slide ${C.sel.slide + 1}</h3>`;
+    if (ph) {
+      const info = C.photos.find(p => p.file === ph.file);
+      h += `<div class="selph"><img src="/api/carousel/thumb?name=${encodeURIComponent(C.name)}&file=${encodeURIComponent(ph.file)}&v=${info ? info.mtime : 0}" alt="">
+        <div><div style="font-weight:600;word-break:break-all">${esc(ph.file)}</div><div class="meta">${info ? info.w + '×' + info.h : 'missing from the folder'}</div>
+        <div class="row" style="margin-top:6px"><button id="reveal">Show in folder</button><button id="clearPh">Remove</button></div></div></div>
+        <div class="kv" style="margin-top:10px">
+          <span class="lbl">Zoom</span><input type="range" id="zZ" min="1" max="3" step="0.01" value="${ph.zoom}">
+          <span class="lbl">Left ↔ right</span><input type="range" id="zX" min="0" max="1" step="0.005" value="${ph.cx}">
+          <span class="lbl">Up ↕ down</span><input type="range" id="zY" min="0" max="1" step="0.005" value="${ph.cy}">
+        </div><div class="row" style="margin-top:8px"><button id="zReset">Reset crop</button></div>
+        <p class="hint">To edit this photo: <b>Show in folder</b>, edit it in any app and save it with the same name. The carousel updates by itself.</p>`;
+    } else h += `<p class="hint">Empty spot. Drag a photo here from the left, or click a photo on the left and press “Put in the selected spot”.</p>`;
+    h += `</div>`;
+  } else h += `<div class="sec"><h3>Photo spots</h3><p class="hint" style="margin:0">Click a photo on the slide to select it. Drag photos from the left onto any spot, or drag one spot onto another to swap them.</p></div>`;
+  h += `<div class="sec"><h3>Slide ${C.slide + 1} · ${esc(K.label)}</h3>` +
+    K.fields.map(([f, lab]) => `<div class="field"><span class="lbl">${esc(lab)}${f.startsWith('g_') ? ' <i style="opacity:.6">(every slide)</i>' : ''}</span><textarea data-f="${f}" rows="${Math.max(1, (sl.text[f] || '').split('\n').length)}" style="width:100%;resize:vertical;box-sizing:border-box" title="Enter starts a new line">${esc(sl.text[f] || '')}</textarea></div>`).join('') +
+    `<div class="row"><button id="sLeft" ${C.slide === 0 ? 'disabled' : ''}>◀ Move</button><button id="sRight" ${C.slide >= C.spec.slides.length - 1 ? 'disabled' : ''}>Move ▶</button>
+      <button id="sDup">Duplicate</button><button id="sDel" ${C.spec.slides.length <= 1 ? 'disabled' : ''}>Delete</button></div></div>`;
+  h += `<div class="sec"><h3>This carousel</h3><div class="meta">${esc(F.about)}</div>
+    <p class="hint">Finalise makes the full-size slides (01.jpg, 02.jpg…) in <b>Carousels\\${esc(C.name)}</b>, ready to post.</p></div>`;
+  $('#right').innerHTML = h;
+  // wire
+  let typing = false;
+  document.querySelectorAll('#right textarea[data-f]').forEach(el => {
+    el.addEventListener('input', () => { if (!typing) { pushHist(); typing = true; } sl.text[el.dataset.f] = el.value; el.rows = Math.max(1, el.value.split('\n').length); $('#saveState').textContent = 'Saving…'; clearTimeout(saveT); saveT = setTimeout(save, 600); queueRender(400); });
+    el.addEventListener('change', () => { typing = false; });
+  });
+  const ph = C.sel && C.spec.slides[C.sel.slide].photos[C.sel.i];
+  if (ph) {
+    let drag = false;
+    for (const [id, key] of [['zZ', 'zoom'], ['zX', 'cx'], ['zY', 'cy']]) {
+      const el = $('#' + id);
+      el.addEventListener('input', () => { if (!drag) { pushHist(); drag = true; } ph[key] = +el.value; queueRender(150); $('#saveState').textContent = 'Saving…'; clearTimeout(saveT); saveT = setTimeout(save, 600); });
+      el.addEventListener('change', () => { drag = false; });
+    }
+    $('#zReset').onclick = () => { pushHist(); ph.cx = 0.5; ph.cy = 0.5; ph.zoom = 1; changed(); };
+    $('#reveal').onclick = () => api('/api/carousel/open', {name: C.name, file: ph.file});
+    $('#clearPh').onclick = () => { pushHist(); C.spec.slides[C.sel.slide].photos[C.sel.i] = null; changed(); };
+  }
+  $('#sLeft').onclick = () => moveSlide(-1); $('#sRight').onclick = () => moveSlide(1);
+  $('#sDup').onclick = () => { pushHist(); C.spec.slides.splice(C.slide + 1, 0, JSON.parse(JSON.stringify(sl))); C.slide++; changed(); };
+  $('#sDel').onclick = () => { if (!confirm('Delete this slide? (Undo brings it back)')) return; pushHist(); C.spec.slides.splice(C.slide, 1); C.sel = null; changed(); };
+}
+function moveSlide(d) {
+  const i = C.slide, j = i + d; if (j < 0 || j >= C.spec.slides.length) return;
+  pushHist(); const a = C.spec.slides; [a[i], a[j]] = [a[j], a[i]]; C.slide = j; C.sel = null; changed();
+}
+function addSlide() {
+  const F = C.formats[C.spec.format], kinds = Object.entries(F.kinds);
+  let kind = kinds[0][0];
+  if (kinds.length > 1) {
+    const ans = prompt('Which kind of slide?\n' + kinds.map(([k, v], i) => `${i + 1} = ${v.label}`).join('\n'), String(kinds.length > 2 ? 2 : 2));
+    if (ans === null) return; const n = parseInt(ans, 10); if (!(n >= 1 && n <= kinds.length)) return; kind = kinds[n - 1][0];
+  }
+  pushHist();
+  const slide = {kind, photos: F.kinds[kind].photos.map(() => null), text: Object.fromEntries(F.kinds[kind].fields.map(([f]) => [f, '']))};
+  C.spec.slides.splice(C.slide + 1, 0, slide); C.slide++; changed();
+}
+
+// ------------------------------------------------------------------ left: library and this carousel's photos
+function buildFilters() {
+  const locs = {}; C.lib.forEach(c => locs[c.l] = (locs[c.l] || 0) + 1);
+  $('#loc').innerHTML = '<option value="all">All places</option>' + Object.keys(locs).sort().map(l => `<option value="${esc(l)}">${esc(l.replace(/\\/g, ' / '))}</option>`).join('');
+  $('#tagChips').innerHTML = TAGS.map(t => `<button class="chip" data-tag="${t}" aria-pressed="false">${t}</button>`).join('');
+}
+let libList = [];
+function libFiltered() {
+  const words = LF.q.toLowerCase().split(/\s+/).filter(Boolean);
+  return C.lib.filter(c => {
+    if (LF.loc !== 'all' && c.l !== LF.loc) return false;
+    if (LF.orient !== 'all' && c.o !== LF.orient) return false;
+    if (LF.kind !== 'all' && (LF.kind === 'photo') !== isPhoto(c)) return false;
+    if (c.t.includes('Unusable')) return false;
+    for (const t of LF.tags) if (!c.t.includes(t)) return false;
+    if (words.length) { const hay = (c.s + ' ' + c.f + ' ' + c.t.join(' ') + ' ' + c.l).toLowerCase(); for (const w of words) if (!hay.includes(w)) return false; }
+    return true;
+  });
+}
+const thumbOf = c => isPhoto(c) ? `/pthumb/${c.id}.jpg` : `/thumbs/${pad(c.id, 4)}_${pad(Math.floor((c.n - 1) / 2), 2)}.jpg`;
+function usedFiles() { const u = {}; C.spec.slides.forEach(s => s.photos.forEach(p => { if (p) u[p.file] = (u[p.file] || 0) + 1; })); return u; }
+function renderLeft() {
+  $('#libHead').hidden = C.tab !== 'lib'; $('#mineHead').hidden = C.tab !== 'mine';
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-pressed', b.dataset.t === C.tab));
+  if (C.tab === 'mine') {
+    const used = usedFiles();
+    $('#grid').innerHTML = C.photos.map((p, i) => `<div class="card" draggable="true" data-file="${esc(p.file)}" title="${esc(p.file)}\nClick to put it in the selected spot · drag onto any spot">
+      <img loading="lazy" src="/api/carousel/thumb?name=${encodeURIComponent(C.name)}&file=${encodeURIComponent(p.file)}&v=${p.mtime}" alt="">
+      ${used[p.file] ? `<span class="b tl">used ${used[p.file] > 1 ? '×' + used[p.file] : ''}</span>` : '<span class="b tr">not used</span>'}
+      <span class="b bl">${p.w >= p.h ? '▭' : '▯'}</span><div class="cap">${esc(p.file)}</div></div>`).join('') ||
+      '<div class="more">No photos yet. Add some from “All photos & videos”.</div>';
+    return;
+  }
+  libList = libFiltered();
+  $('#libCount').textContent = `${libList.length.toLocaleString()} ${LF.kind === 'video' ? 'videos' : LF.kind === 'photo' ? 'photos' : 'photos & videos'} · click to look · drag onto a spot`;
+  $('#grid').innerHTML = libList.slice(0, LF.shown).map((c, i) => `<div class="card" draggable="true" data-i="${i}" title="${esc(c.s || c.f)}\n${esc(c.l.replace(/\\/g, ' / '))}">
+      <img loading="lazy" src="${thumbOf(c)}" alt="">
+      <span class="b bl">${c.o === 'portrait' ? '▯' : '▭'}</span><span class="b br">${isPhoto(c) ? (c.raw ? '📷 raw' : '📷') : '🎬 ' + c.d.toFixed(0) + 's'}</span>
+      <div class="cap">${esc(c.s || c.f)}</div></div>`).join('') +
+    (libList.length > LF.shown ? `<button class="more" id="libMore">Show more (${libList.length - LF.shown} left)</button>` : (libList.length ? '' : '<div class="more">Nothing matches.</div>'));
+}
+
+// ------------------------------------------------------------------ putting photos into spots
+async function fileForLib(c, t) {
+  toast(isPhoto(c) ? 'Copying the full-size photo into this carousel…' : 'Taking a full-size frame from the video…', 0);
+  const r = await api('/api/carousel/add', {name: C.name, clip: c.id, t});
+  await refreshPhotos(); toast('Added to this carousel’s photos');
+  return r.file;
+}
+function putFile(slide, i, file) {
+  pushHist(); C.spec.slides[slide].photos[i] = {file, cx: 0.5, cy: 0.5, zoom: 1};
+  C.sel = {slide, i}; changed();
+}
+function swapSpots(a, b) {
+  if (a.slide === b.slide && a.i === b.i) return;
+  pushHist();
+  const A = C.spec.slides[a.slide].photos, B = C.spec.slides[b.slide].photos;
+  const t = A[a.i]; A[a.i] = B[b.i]; B[b.i] = t; C.sel = b; changed();
+  toast('Swapped');
+}
+async function refreshPhotos() {
+  const d = await api('/api/carousel/photos?name=' + encodeURIComponent(C.name));
+  const before = Object.fromEntries(C.photos.map(p => [p.file, p.mtime])), used = usedFiles();
+  const edited = d.photos.filter(p => before[p.file] && before[p.file] !== p.mtime && used[p.file]).map(p => p.file);
+  const added = d.photos.filter(p => !(p.file in before)).map(p => p.file);
+  const sig = ps => ps.map(p => p.file + ':' + p.mtime).join('|');
+  const same = sig(d.photos) === sig(C.photos);
+  C.photos = d.photos;
+  if (!same && C.tab === 'mine' && !dragData) renderLeft();      // only redraw when the folder really changed
+  if (edited.length) { toast(`Updated with your edit of <b>${esc(edited[0])}</b>${edited.length > 1 ? ` and ${edited.length - 1} more` : ''}`); queueRender(0); renderRight(); }
+  else if (added.length && C.tab !== 'mine') toast(`New in the photos folder: <b>${esc(added[0])}</b> — see “This carousel”`, 4000);
+  return d;
+}
+setInterval(() => { if (C.name && document.visibilityState === 'visible') refreshPhotos().catch(() => {}); }, 2500);
+
+// ------------------------------------------------------------------ looking at a library photo / taking a frame from a video
+const blobCache = new Map();
+function blobUrl(url) { if (!blobCache.has(url)) blobCache.set(url, fetch(url).then(r => r.blob()).then(b => URL.createObjectURL(b))); return blobCache.get(url); }
+async function proxyUrl(id) { for (let k = 0; k < 600; k++) { const r = await api('/api/proxy?id=' + id); if (r.status === 'ready') return r.url; if (r.status === 'error') return null; await new Promise(res => setTimeout(res, 1000)); } return null; }
+function lightbox(c) {
+  const m = document.createElement('div'); m.className = 'modal';
+  const sel = C.sel ? `the “${C.formats[C.spec.format].kinds[C.spec.slides[C.sel.slide].kind].photos[C.sel.i]}” spot on slide ${C.sel.slide + 1}` : null;
+  m.innerHTML = `<div class="box2"><div class="row" style="justify-content:space-between"><b>${esc(c.s || c.f)}</b><span class="meta">${esc(c.l.replace(/\\/g, ' / '))} · ${esc(c.f)}</span></div>
+    ${isPhoto(c) ? `<img class="lightimg" src="/pprev/${c.id}.jpg" alt="">` :
+      `<video class="lightvid" id="lv" muted playsinline controls></video><div class="meta" id="lvMsg">Getting the video ready…</div>`}
+    <div class="row"><button class="primary" id="lbPut" ${sel ? '' : 'disabled'} title="${sel ? '' : 'Select a photo spot on a slide first'}">${isPhoto(c) ? 'Put in' : 'Use this frame in'} ${sel ? esc(sel) : 'the selected spot'}</button>
+      <button id="lbAdd">${isPhoto(c) ? 'Add to this carousel’s photos' : 'Add this frame to this carousel’s photos'}</button><span class="spacer"></span><button id="lbClose">Close</button></div></div>`;
+  document.body.appendChild(m);
+  const close = () => m.remove();
+  m.addEventListener('pointerdown', e => { if (e.target === m) close(); });
+  m.querySelector('#lbClose').onclick = close;
+  const v = m.querySelector('#lv');
+  if (v) proxyUrl(c.id).then(u => u && blobUrl(u)).then(bu => { if (!bu) { m.querySelector('#lvMsg').textContent = 'This video can’t be played here.'; return; } v.src = bu; m.querySelector('#lvMsg').textContent = 'Pause on the moment you want, then use the frame.'; });
+  const go = async put => {
+    try {
+      const t = v ? v.currentTime : undefined; const file = await fileForLib(c, t); close();
+      if (put && C.sel) putFile(C.sel.slide, C.sel.i, file);
+    } catch (e) { toast('Sorry: ' + esc(e.message), 6000); }
+  };
+  m.querySelector('#lbPut').onclick = () => go(true);
+  m.querySelector('#lbAdd').onclick = () => go(false);
+}
+
+// ------------------------------------------------------------------ drag & drop
+let dragData = null;
+document.addEventListener('dragstart', e => {
+  const box = e.target.closest && e.target.closest('.box');
+  if (box) { dragData = {type: 'spot', slide: +box.dataset.slide, i: +box.dataset.i}; e.dataTransfer.setData('text/plain', 'spot'); e.dataTransfer.effectAllowed = 'move'; return; }
+  const card = e.target.closest && e.target.closest('#grid .card');
+  if (card) {
+    dragData = card.dataset.file ? {type: 'file', file: card.dataset.file} : {type: 'lib', c: libList[+card.dataset.i]};
+    e.dataTransfer.setData('text/plain', 'photo'); e.dataTransfer.effectAllowed = 'copy';
+    const img = card.querySelector('img'); if (img) e.dataTransfer.setDragImage(img, 40, 40);
+  }
+});
+document.addEventListener('dragend', () => { dragData = null; document.querySelectorAll('.box.drop').forEach(b => b.classList.remove('drop')); });
+document.addEventListener('dragover', e => {
+  const box = e.target.closest && e.target.closest('.box'); if (!box || !dragData) return;
+  e.preventDefault(); document.querySelectorAll('.box.drop').forEach(b => { if (b !== box) b.classList.remove('drop'); }); box.classList.add('drop');
+});
+document.addEventListener('drop', async e => {
+  const box = e.target.closest && e.target.closest('.box'); if (!box || !dragData) return;
+  e.preventDefault(); const d = dragData; dragData = null; box.classList.remove('drop');
+  const to = {slide: +box.dataset.slide, i: +box.dataset.i};
+  if (d.type === 'spot') swapSpots(d, to);
+  else if (d.type === 'file') putFile(to.slide, to.i, d.file);
+  else if (d.type === 'lib') {
+    if (!isPhoto(d.c)) { C.sel = to; renderRight(); lightbox(d.c); toast('Pick the moment in the video, then “Use this frame”', 5000); return; }
+    try { putFile(to.slide, to.i, await fileForLib(d.c)); } catch (err) { toast('Sorry: ' + esc(err.message), 6000); }
+  }
+});
+
+// ------------------------------------------------------------------ clicks and wiring
+document.addEventListener('click', e => {
+  const box = e.target.closest('.box');
+  if (box) { C.sel = {slide: +box.dataset.slide, i: +box.dataset.i}; const th = box.closest('.thumb'); if (th) C.slide = +th.dataset.s; drawStage(); renderRight(); return; }
+  const th = e.target.closest('#strip .thumb'); if (th) { goSlide(+th.dataset.s); return; }
+  if (e.target.id === 'addSlide') { addSlide(); return; }
+  const cth = e.target.closest('#cmpStrip .thumb'); if (cth) return;
+});
+$('#prev').onclick = () => goSlide(C.slide - 1);
+$('#next').onclick = () => goSlide(C.slide + 1);
+$('#undo').onclick = undo; $('#redo').onclick = redo;
+$('#grid').addEventListener('click', async e => {
+  if (e.target.id === 'libMore') { LF.shown += 120; renderLeft(); return; }
+  const card = e.target.closest('.card'); if (!card) return;
+  if (card.dataset.file) {
+    if (C.sel) putFile(C.sel.slide, C.sel.i, card.dataset.file);
+    else toast('Select a photo spot on a slide first, then click this photo (or drag it onto the spot)');
+    return;
+  }
+  lightbox(libList[+card.dataset.i]);
+});
+document.querySelectorAll('.tabs button').forEach(b => b.onclick = () => { C.tab = b.dataset.t; renderLeft(); });
+$('#q').addEventListener('input', e => { LF.q = e.target.value.trim(); LF.shown = 120; renderLeft(); });
+$('#loc').addEventListener('change', e => { LF.loc = e.target.value; LF.shown = 120; renderLeft(); });
+for (const id of ['orient', 'kind']) $('#' + id).addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; LF[id] = b.dataset.v; $('#' + id).querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); LF.shown = 120; renderLeft(); });
+$('#tagChips').addEventListener('click', e => { const b = e.target.closest('[data-tag]'); if (!b) return; const t = b.dataset.tag; LF.tags.has(t) ? LF.tags.delete(t) : LF.tags.add(t); b.setAttribute('aria-pressed', LF.tags.has(t)); renderLeft(); });
+$('#lookSel').onchange = e => { pushHist(); C.spec.look.grade = e.target.value; changed(); };
+let amtDrag = false;
+$('#lookAmt').addEventListener('input', e => { if (!amtDrag) { pushHist(); amtDrag = true; } C.spec.look.amt = +e.target.value; queueRender(250); $('#saveState').textContent = 'Saving…'; clearTimeout(saveT); saveT = setTimeout(save, 600); });
+$('#lookAmt').addEventListener('change', () => { amtDrag = false; });
+$('#openPhotos').onclick = $('#openPhotos2').onclick = () => api('/api/carousel/open', {name: C.name, photos: true});
+$('#finalise').onclick = async () => {
+  $('#finalise').disabled = true; toast('Making the full-size slides…', 0);
+  try {
+    await save(); const r = await api('/api/carousel/export', {name: C.name, spec: C.spec});
+    toast(`Saved ${r.files.length} slides (01.jpg – ${esc(r.files[r.files.length - 1])}) <button id="tOpen">Open folder</button>`, 10000);
+    $('#tOpen').onclick = () => api('/api/carousel/open', {name: C.name});
+  } catch (e) { toast('Could not finalise: ' + esc(e.message), 8000); }
+  $('#finalise').disabled = false;
+};
+$('#saveVer').onclick = async () => {
+  const n = (C.spec.versions || []).length + 1, label = prompt('Name this version', `Version ${n}`);
+  if (label === null) return;
+  const copy = JSON.parse(snap()); delete copy.versions;
+  C.spec.versions = [...(C.spec.versions || []), {label: label || `Version ${n}`, time: Date.now(), spec: copy}];
+  await save(); renderCmpSel(); toast(`Saved “${esc(label || 'Version ' + n)}”. Pick it in “Compare with…” to see it next to your changes.`, 5000);
+};
+$('#cmpSel').onchange = async e => {
+  const i = e.target.value;
+  if (i === '') { C.cmp = null; $('#cmpWrap').hidden = true; return; }
+  const v = C.spec.versions[+i]; C.cmp = +i;
+  $('#cmpWrap').hidden = false; $('#cmpLbl').textContent = `${v.label} · ${new Date(v.time).toLocaleString()}`; $('#cmpStrip').innerHTML = '<span class="meta">drawing…</span>';
+  const r = await api('/api/carousel/render', {name: C.name, spec: v.spec});
+  $('#cmpStrip').innerHTML = r.slides.map((u, k) => `<div class="thumb"><div class="im"><img src="${u}" alt=""></div><div class="n">${k + 1}</div></div>`).join('');
+};
+$('#restoreVer').onclick = () => {
+  if (C.cmp === null) return; const v = C.spec.versions[C.cmp];
+  if (!confirm(`Go back to “${v.label}”? Your current version stays in Undo.`)) return;
+  pushHist(); const keep = C.spec.versions; C.spec = {...JSON.parse(JSON.stringify(v.spec)), versions: keep}; C.sel = null; changed(); renderCmpSel();
+};
+$('#pick').addEventListener('change', async e => {
+  const v = e.target.value;
+  if (v !== '__new') { await save(); openCarousel(v); return; }
+  renderPick(); templateGallery(false);
+});
+$('#tplBtn').onclick = () => templateGallery(!!C.name);
+
+// ------------------------------------------------------------------ template gallery: every format, with a preview
+function templateGallery(withPhotos) {
+  const fmts = Object.entries(C.formats).sort((a, b) => (b[1].new ? 1 : 0) - (a[1].new ? 1 : 0));   // the new collections first
+  const ORDER = ['Your references', 'Editorial & magazine', 'Cinematic', 'Minimal & journal', 'Vintage & postcards', 'Scrapbook & polaroid', 'Film & analog',
+    'Guides & itineraries', 'Seamless & panorama', 'Bold type & posters', 'Adventure & outdoor', 'Collage & experimental', 'Grids & photo dumps', 'Fun & story'];
+  const present = new Set(fmts.map(([, f]) => f.group || 'More'));
+  const groups = ['All', 'New', ...ORDER.filter(g => present.has(g)), ...[...present].filter(g => !ORDER.includes(g))];
+  const cnt = g => g === 'All' ? fmts.length : fmts.filter(([, f]) => g === 'New' ? f.new : (f.group || 'More') === g).length;
+  let group = 'All', q = '', pick = null;
+  const m = document.createElement('div'); m.className = 'modal';
+  m.innerHTML = `<div class="box2 tplbox">
+    <div class="row" style="justify-content:space-between"><b style="font-size:16px">Pick a template · ${fmts.length} formats</b>
+      <input type="search" id="tq" placeholder="Search: polaroid, itinerary, film, quote…" style="width:320px"></div>
+    <div class="chips" id="tg">${groups.map(g => `<button class="chip" data-g="${esc(g)}" aria-pressed="${g === 'All'}">${esc(g)} <span style="opacity:.6">${cnt(g)}</span></button>`).join('')}</div>
+    <div class="tplgrid" id="tl"></div>
+    <div class="row" style="flex-wrap:nowrap;border-top:1px solid var(--line);padding-top:10px">
+      <span class="lbl">Name</span><input type="text" id="tn" style="flex:1;min-width:0" placeholder="Name of the new carousel (also its folder name)">
+      ${C.name ? `<label class="lbl" style="display:inline-flex;gap:5px;align-items:center;white-space:nowrap"><input type="checkbox" id="tf" ${withPhotos ? 'checked' : ''}> Use the photos from “${esc(C.name)}”</label>` : ''}
+      <button class="primary" id="tc" disabled>Create carousel</button><button id="tx">Cancel</button></div></div>`;
+  document.body.appendChild(m);
+  const list = () => {
+    const words = q.toLowerCase().split(/\s+/).filter(Boolean);
+    const show = fmts.filter(([k, f]) => (group === 'All' || (group === 'New' ? f.new : (f.group || 'More') === group)) &&
+      words.every(w => (k + ' ' + f.label + ' ' + f.about + ' ' + (f.ref || '') + ' ' + (f.group || '')).toLowerCase().includes(w)));
+    m.querySelector('#tl').innerHTML = show.map(([k, f]) => `<div class="tpl ${k === pick ? 'on' : ''}" data-k="${k}" title="${esc(f.about)}">
+      <img loading="lazy" src="/api/carousel/template-preview?key=${encodeURIComponent(k)}" alt="">
+      <b>${esc(f.label)}</b><div class="meta">${esc(f.about)}</div>
+      <div class="meta">${f.new ? '<b style="color:#e8b04a">NEW</b> · ' : ''}${esc(f.group || '')}${f.ref ? ' · based on ' + esc(f.ref) : ''} · ${(f.default || []).length} slides</div></div>`).join('') || '<div class="meta">No template matches.</div>';
+  };
+  const ready = () => { m.querySelector('#tc').disabled = !(pick && m.querySelector('#tn').value.trim()); };
+  list();
+  m.querySelector('#tq').addEventListener('input', e => { q = e.target.value.trim(); list(); });
+  m.querySelector('#tg').addEventListener('click', e => { const b = e.target.closest('[data-g]'); if (!b) return; group = b.dataset.g; m.querySelectorAll('#tg .chip').forEach(x => x.setAttribute('aria-pressed', x === b)); list(); });
+  m.querySelector('#tl').addEventListener('click', e => {
+    const t = e.target.closest('.tpl'); if (!t) return; pick = t.dataset.k;
+    m.querySelectorAll('.tpl').forEach(x => x.classList.toggle('on', x === t));
+    const n = m.querySelector('#tn'); if (!n.value.trim() || n.dataset.auto) { n.value = `${C.formats[pick].label}${C.name && m.querySelector('#tf')?.checked ? ' – ' + C.name : ''}`.replace(/[<>:"/\\|?*]/g, ''); n.dataset.auto = '1'; }
+    ready();
+  });
+  m.querySelector('#tn').addEventListener('input', e => { delete e.target.dataset.auto; ready(); });
+  m.querySelector('#tx').onclick = () => m.remove();
+  m.addEventListener('pointerdown', e => { if (e.target === m) m.remove(); });
+  m.querySelector('#tc').onclick = async () => {
+    const name = m.querySelector('#tn').value.trim(), from = m.querySelector('#tf')?.checked ? C.name : undefined;
+    m.querySelector('#tc').disabled = true;
+    try {
+      if (C.name) await save();
+      await api('/api/carousel/new', {name, format: pick, from});
+      C.list = (await api('/api/carousel/list')).carousels; m.remove();
+      await openCarousel(C.list.find(x => x.name.toLowerCase() === name.toLowerCase())?.name || name);
+      toast(from ? `Made “${esc(name)}” with the photos from “${esc(from)}” — swap them around as you like` : `Made “${esc(name)}”. Drag photos from the left onto the empty spots.`, 6000);
+    } catch (err) { toast('Could not make it: ' + esc(err.message), 6000); m.querySelector('#tc').disabled = false; }
+  };
+}
+document.addEventListener('keydown', e => {
+  if (e.target.matches?.('input, select, textarea')) return;
+  const k = e.key.toLowerCase();
+  if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); redo(); }
+  else if (e.key === 'ArrowLeft') goSlide(C.slide - 1);
+  else if (e.key === 'ArrowRight') goSlide(C.slide + 1);
+  else if (e.key === 'Escape') { document.querySelector('.modal')?.remove(); if (C.sel) { C.sel = null; drawStage(); renderRight(); } }
+});
+
+(async function boot() {
+  try {
+    const [init, list] = await Promise.all([api('/api/init'), api('/api/carousel/list')]);
+    if (init.stale) { $('#loading').textContent = 'Reel Studio was updated — close the black Reel Studio window and start it again.'; return; }
+    C.lib = init.library.filter(c => c.n > 0); C.lib.forEach(c => C.byId[c.id] = c);
+    C.list = list.carousels; C.formats = list.formats; C.looks = list.looks;
+    buildFilters();
+    if (!C.list.length) { $('#loading').textContent = 'No carousels yet. Ask Claude for a carousel idea, or pick “New carousel”.'; }
+    let last = null; try { last = localStorage.getItem('cs-last'); } catch (e) {}
+    const first = C.list.find(c => c.name === last) || C.list[0];
+    if (first) await openCarousel(first.name);
+    $('#loading').remove();
+  } catch (e) { console.error(e); $('#loading').textContent = 'Could not load Carousel Studio: ' + e.message; }
+})();
+</script>
+</body>
+</html>

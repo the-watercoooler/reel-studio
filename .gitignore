@@ -1,0 +1,33 @@
+# ---------------------------------------------------------------------------------------------
+# Everything below is personal and stays on your PC. Only the app itself is shared.
+# (Your footage is never inside this folder anyway: Reel Studio only reads the folders you add.)
+# ---------------------------------------------------------------------------------------------
+
+# your footage folders, clip index and reels
+collections.json
+library.json
+projects/
+exports/
+Carousels/
+
+# your templates (inspiration reels: their songs, words and the original videos)
+templates/
+audio/
+insp/
+
+# previews, thumbnails, text images, renders: rebuilt automatically
+cache/
+
+# personal notes and one-off scripts
+Feedback.md
+pipeline/
+fonts/
+
+# Python / editor noise
+__pycache__/
+*.pyc
+*.part
+*.tmp
+.claude/settings.local.json
+Thumbs.db
+desktop.ini

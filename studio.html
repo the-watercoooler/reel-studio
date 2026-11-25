@@ -1,0 +1,2131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reel Studio</title>
+<style>
+:root{--bg:#0e0e10;--panel:#17171a;--panel2:#1f1f23;--panel3:#29292e;--line:#2b2b30;--ink:#ececf0;--muted:#9494a0;
+  --accent:#23d4c4;--accent-ink:#03110f;--violet:#8b7bff;--warn:#f5b347}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font:13px/1.4 "Segoe UI",system-ui,sans-serif}
+body{display:grid;grid-template-rows:54px minmax(0,1fr) 296px;height:100vh;overflow:hidden}
+button,input,select{font:inherit;color:inherit}
+button{background:var(--panel3);border:1px solid var(--line);border-radius:7px;padding:5px 11px;cursor:pointer;min-height:30px;white-space:nowrap}
+button:hover:not(:disabled){border-color:#4a4a52}
+button.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:650}
+button:disabled{opacity:.4;cursor:default}
+select,input[type=text],input[type=search],input[type=number]{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:5px 8px;min-height:30px}
+input[type=range]{accent-color:var(--accent);width:100%}
+header{display:flex;align-items:center;gap:8px;padding:0 12px;background:var(--panel);border-bottom:1px solid var(--line);min-width:0}
+.brand{font-weight:750;font-size:15px;margin-right:6px;white-space:nowrap}
+.brand b{color:var(--accent)}
+#proj{max-width:250px;min-width:60px;flex:0 1 250px}
+#pname{width:240px;min-width:60px;flex:0 1 240px}
+#fmtSel,#fillSel,#expFmt,#expQ{max-width:112px}
+@media (max-width:1500px){#fmtSel,#fillSel,#expFmt,#expQ{max-width:96px}#saveState{max-width:76px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}}
+header>button,header>select,header>a,header>.pill{flex-shrink:0}
+.spacer{flex:1}
+.pill{font-size:12px;color:var(--muted);padding:3px 10px;border-radius:999px;background:var(--panel2);white-space:nowrap}
+.pill.on{color:var(--accent)}
+.lbl{color:var(--muted);font-size:12px}
+#app{display:grid;grid-template-columns:330px minmax(0,1fr) 320px;min-height:0}
+#app.inspClosed{grid-template-columns:330px minmax(0,1fr) 38px}
+aside{background:var(--panel);display:flex;flex-direction:column;min-height:0}
+#lib{border-right:1px solid var(--line)}
+#inspCol{border-left:1px solid var(--line)}
+#inspHead{display:flex;align-items:center;gap:8px;padding:6px 8px;border-bottom:1px solid var(--line);flex:none}
+#inspToggle{min-height:26px;padding:2px 9px}
+#insp{flex:1;min-height:0;overflow-y:auto}
+#app.inspClosed #insp{display:none}
+#app.inspClosed #inspHead{flex-direction:column;border:0;padding:8px 0;height:100%;cursor:pointer}
+#app.inspClosed #inspTitle{writing-mode:vertical-rl;letter-spacing:.06em}
+/* colour looks */
+#lookBtn{display:inline-flex;align-items:center;gap:6px}
+#lookPop{position:fixed;z-index:60;width:600px;max-width:calc(100vw - 16px);max-height:calc(100vh - 70px);overflow:auto;background:var(--panel);border:1px solid #3a3a42;border-radius:12px;padding:12px;box-shadow:0 18px 50px rgba(0,0,0,.6)}
+#lookGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(66px,1fr));gap:8px}
+.lk{display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px;background:transparent;border:2px solid transparent;border-radius:9px;min-height:0}
+.lk canvas{width:58px;height:103px;border-radius:5px;background:#000;display:block}
+.lk span{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:62px}
+.lk:hover{border-color:#4a4a52}
+.lk.on{border-color:var(--accent)}
+.lk.on span{color:var(--ink)}
+#adjPane h4{margin:12px 0 6px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:650}
+#adjPane h4:first-child{margin-top:4px}
+.adj{display:grid;grid-template-columns:118px 1fr 46px;gap:10px;align-items:center;margin:4px 0}
+.adj .lbl{cursor:default}
+.adj .v{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;text-align:right}
+.adj input.hue{-webkit-appearance:none;appearance:none;height:10px;border-radius:5px;background:linear-gradient(90deg,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00)}
+.adj input.hue::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#fff;border:2px solid #000}
+.slot .lk1{position:absolute;right:3px;top:2px;font-size:11px;background:rgba(0,0,0,.7);padding:0 3px;border-radius:3px}
+/* full screen reel */
+.ovbtn{position:absolute;right:8px;top:8px;min-height:0;width:32px;height:32px;padding:0;border-radius:8px;background:rgba(0,0,0,.6);border-color:rgba(255,255,255,.25);font-size:17px;z-index:3}
+#fsBar{display:none}
+#cvWrap.fs{display:flex;align-items:center;justify-content:center;background:#000;border-radius:0;box-shadow:none}
+#cvWrap.pseudo{position:fixed;inset:0;z-index:90;width:100vw;height:100vh;aspect-ratio:auto}
+#cvWrap.fs canvas{height:100vh;width:auto;aspect-ratio:var(--ar,9/16);max-width:100vw;max-height:100vh;object-fit:contain;cursor:pointer}
+#cvWrap{aspect-ratio:var(--ar,9/16)}
+#cvWrap.sized{flex:none;aspect-ratio:auto}
+#cvWrap.fs .tag,#cvWrap.fs #fsBtn{display:none}
+#cvWrap.fs #fsBar{display:flex;align-items:center;gap:10px;position:absolute;left:50%;bottom:28px;transform:translateX(-50%);width:min(620px,92vw);padding:8px 12px;border-radius:12px;background:rgba(20,20,24,.82);transition:opacity .3s}
+#cvWrap.fs.idle #fsBar{opacity:0}
+#cvWrap.fs.idle,#cvWrap.fs.idle canvas{cursor:none}
+#fsProg{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.2);cursor:pointer;position:relative}
+#fsFill{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent)}
+#fsTime{font-variant-numeric:tabular-nums;color:#ddd;font-size:12px;min-width:100px;text-align:right}
+/* text editor bubble */
+#txEdit{position:fixed;z-index:70;width:340px;background:var(--panel);border:1px solid #4a4a52;border-radius:12px;padding:10px;box-shadow:0 14px 40px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:8px}
+#txEdit textarea{font-size:16px;min-height:40px;resize:none;overflow:hidden}
+.swatches{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.sw{width:22px;height:22px;min-height:0;padding:0;border-radius:50%;border:2px solid #0e0e10;box-shadow:0 0 0 1px #4a4a52}
+.sw.on{box-shadow:0 0 0 2px var(--accent)}
+.sw.def{position:relative;font-size:10px;font-weight:800;color:#000;line-height:18px}
+.swatches input[type=color]{width:26px;height:24px;padding:0;border:0;background:transparent;cursor:pointer}
+/* photos */
+.clipbox img{width:100%;height:100%;object-fit:contain;display:block}
+.pvpart{display:flex;align-items:center;gap:8px;flex:none;min-height:26px}
+.pvpart .lbl b{color:var(--accent);font-weight:650}
+.lib-head{padding:10px;display:flex;flex-direction:column;gap:7px;border-bottom:1px solid var(--line)}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.chips{display:flex;gap:4px;flex-wrap:wrap}
+.chip{font-size:11.5px;padding:2px 8px;border-radius:999px;background:var(--panel3);border:1px solid transparent;cursor:pointer;min-height:0;line-height:1.5}
+.chip[aria-pressed=true]{background:var(--violet);color:#fff}
+.chip.tog[aria-pressed=true]{background:var(--ink);color:var(--bg)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:7px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:var(--panel2);padding:4px 10px;min-height:28px}
+.seg button+button{border-left:1px solid var(--line)}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--accent-ink)}
+#libGrid{flex:1;min-height:0;overflow-y:auto;padding:10px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:150px;gap:8px;align-content:start}
+.card{position:relative;height:150px;border-radius:7px;overflow:hidden;background:#000;cursor:pointer;outline:2px solid transparent;outline-offset:-2px}
+.card:hover{outline-color:var(--accent)}
+.card img{width:100%;height:100%;object-fit:cover;display:block}
+.card .b{position:absolute;font-size:10.5px;background:rgba(0,0,0,.72);padding:1px 5px;border-radius:3px;pointer-events:none}
+.card .d{right:4px;bottom:4px}
+.card .o{left:4px;bottom:4px}
+.card .u{left:4px;top:4px;background:var(--violet)}
+.card .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 6px 20px;font-size:11px;background:linear-gradient(transparent,rgba(0,0,0,.85));opacity:0;transition:opacity .12s;pointer-events:none}
+.card:hover .cap{opacity:1}
+.libfoot{grid-column:1/-1;text-align:center;color:var(--muted);padding:6px;align-self:start}
+#stage{display:flex;flex-direction:column;min-height:0;padding:12px 12px 8px;gap:8px}
+.screens{flex:1;min-height:0;display:flex;justify-content:center;align-items:center;gap:18px}
+.screen{height:100%;aspect-ratio:9/16;position:relative;border-radius:10px;overflow:hidden;background:#000;box-shadow:0 0 0 1px var(--line)}
+.screen canvas,.screen video{width:100%;height:100%;display:block;object-fit:cover}
+.screen .tag{position:absolute;left:8px;top:8px;font-size:11px;background:rgba(0,0,0,.65);padding:2px 8px;border-radius:4px;pointer-events:none}
+[hidden]{display:none !important}
+.side{flex:0 1 560px;min-width:230px;height:100%;display:flex;flex-direction:column;gap:8px;min-height:0}
+.tabs{display:flex;gap:5px;flex:none}
+.tabs button{min-height:28px;padding:3px 13px;border-radius:999px;background:var(--panel2)}
+.tabs button[aria-pressed=true]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.sidebody{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+#origWrap{height:100%}
+.clipview{width:100%;height:100%;display:flex;flex-direction:column;gap:8px;min-height:0}
+.clipbox{position:relative;flex:1;min-height:0;background:#000;border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}
+.clipbox video{width:100%;height:100%;object-fit:contain;display:block;cursor:pointer}
+.guide{position:absolute;border:1.5px dashed rgba(255,255,255,.8);box-shadow:0 0 0 9999px rgba(0,0,0,.38);pointer-events:none}
+.guide span{position:absolute;left:5px;top:5px;font-size:10px;background:rgba(0,0,0,.65);padding:1px 6px;border-radius:3px;white-space:nowrap}
+.pvmsg{position:absolute;left:0;right:0;bottom:14px;text-align:center;pointer-events:none}
+.pvmsg span{font-size:12px;color:var(--accent);background:rgba(0,0,0,.75);padding:4px 10px;border-radius:6px}
+.pvbar{display:flex;align-items:center;gap:8px;flex:none}
+.pvscrub{position:relative;flex:1;height:34px;border-radius:6px;background:var(--panel2);cursor:pointer;overflow:hidden;touch-action:none}
+.pvthumbs{position:absolute;inset:0;display:flex;opacity:.55;pointer-events:none}
+.pvthumbs img{flex:1;min-width:0;height:100%;object-fit:cover}
+.pvwin{position:absolute;top:0;bottom:0;min-width:6px;background:rgba(35,212,196,.32);border:2px solid var(--accent);border-radius:4px;box-shadow:0 0 0 9999px rgba(0,0,0,.45);pointer-events:none}
+.pvhead{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;pointer-events:none}
+#pvTime{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12px;min-width:92px;text-align:right}
+.pvfoot{display:flex;align-items:center;gap:8px;flex:none}
+.pvinfo{flex:1;min-width:0}
+.pvinfo b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pvinfo .meta{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card .add{position:absolute;right:4px;top:4px;width:28px;height:28px;min-height:0;padding:0;border-radius:50%;background:var(--accent);color:var(--accent-ink);border:0;font-weight:800;font-size:17px;line-height:26px;opacity:0;transition:opacity .12s}
+.card:hover .add,.card.pv .add{opacity:1}
+.card.pv{outline-color:#fff}
+#cv{cursor:grab;touch-action:none}
+#cv.fit{cursor:default}
+.controls{display:flex;justify-content:center;align-items:center;gap:8px}
+#time{font-variant-numeric:tabular-nums;color:var(--muted);min-width:130px;text-align:center}
+.playbtn{width:42px;height:42px;border-radius:50%;padding:0;font-size:15px}
+.hint{color:var(--muted);font-size:11.5px;margin:6px 0 0}
+.sec{padding:12px 14px;border-bottom:1px solid var(--line)}
+.sec h3{margin:0 0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);font-weight:650}
+.shot-title{font-size:16px;font-weight:650}
+.meta{color:var(--muted);font-size:12px}
+.strip{position:relative;height:60px;border-radius:6px;background:#000 0 0/100% 100% no-repeat;cursor:pointer;overflow:hidden;display:flex}
+.strip img{flex:1;min-width:0;height:100%;object-fit:cover}
+.strip .win{position:absolute;top:0;bottom:0;border:2px solid var(--accent);border-radius:5px;box-shadow:0 0 0 9999px rgba(0,0,0,.6);cursor:grab}
+.kv{display:grid;grid-template-columns:78px 1fr;gap:8px 10px;align-items:center}
+.cmp{display:flex;gap:12px;align-items:center;margin-top:10px}
+.cmp canvas{width:72px;height:128px;border-radius:5px;background:#000;flex:none}
+.warn{color:var(--warn);font-size:12px;margin-top:6px}
+footer{background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-rows:40px minmax(0,1fr);min-height:0}
+.tbar{display:flex;align-items:center;gap:8px;padding:0 12px;border-bottom:1px solid var(--line)}
+.tbar label{display:inline-flex;align-items:center;gap:6px}
+#tlScroll{overflow:auto;position:relative}
+#tl{position:relative;margin:0 18px;min-height:100%;min-width:100px}
+#ruler{position:absolute;top:4px;left:0;height:24px;cursor:pointer}
+#vtrack{position:absolute;top:32px;left:0;height:88px}
+#handles{position:absolute;top:32px;left:0;height:88px}
+#ttrack{position:absolute;top:126px;left:0;height:28px}
+#wave{position:absolute;top:160px;left:0;height:46px;cursor:pointer}
+.slot.drop{border-color:var(--warn);box-shadow:inset 0 0 0 3px var(--warn)}
+.slot.drop::after{content:'Drop to replace';position:absolute;inset:auto 0 4px 0;text-align:center;font-size:11px;font-weight:650;color:var(--warn);text-shadow:0 1px 2px #000}
+#cvWrap.drop{box-shadow:0 0 0 3px var(--warn)}
+textarea{width:100%;resize:vertical;background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:7px 9px;color:inherit;font:15px/1.35 "Segoe UI",system-ui,sans-serif}
+#playhead{position:absolute;top:0;bottom:0;width:2px;margin-left:-1px;background:#fff;pointer-events:none;z-index:6}
+#playhead::before{content:'';position:absolute;top:0;left:-6px;border:7px solid transparent;border-top:9px solid #fff}
+.slot{position:absolute;top:0;height:88px;border-radius:6px;overflow:hidden;background:#2b2b30 left center/auto 100% repeat-x;border:2px solid #0e0e10;cursor:pointer}
+.slot.sel{border-color:var(--accent);z-index:2}
+.slot .n{position:absolute;left:4px;top:3px;font-size:10.5px;background:rgba(0,0,0,.7);padding:0 5px;border-radius:3px}
+.slot .ld{position:absolute;left:4px;bottom:3px;font-size:10px;background:rgba(0,0,0,.75);padding:0 4px;border-radius:3px;color:var(--accent)}
+.handle{position:absolute;top:0;height:88px;width:14px;margin-left:-7px;cursor:ew-resize;z-index:4}
+.handle::after{content:'';position:absolute;left:5px;top:24px;bottom:24px;width:4px;border-radius:2px;background:rgba(255,255,255,.6)}
+.handle:hover::after,.handle.drag::after{background:var(--accent)}
+.tx{position:absolute;height:24px;border-radius:5px;background:#352b6e;color:#ddd6ff;font-size:11px;padding:4px 13px;white-space:nowrap;overflow:hidden;cursor:grab;border:1px solid #0e0e10;user-select:none;display:flex;gap:6px}
+.tx .tl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.tx .dur{flex:none;opacity:.65;font-size:10px;font-variant-numeric:tabular-nums}
+.tx.narrow .dur{display:none}
+.tx:hover{background:#43369a}
+.tx.sel{background:var(--violet);color:#fff;border-color:#fff;z-index:2}
+.tx .eL,.tx .eR{position:absolute;top:0;bottom:0;width:10px;cursor:ew-resize;background:rgba(255,255,255,.13)}
+.tx .eL{left:0;border-radius:4px 0 0 4px}.tx .eR{right:0;border-radius:0 4px 4px 0}
+.tx .eL::after,.tx .eR::after{content:'';position:absolute;left:4px;top:6px;bottom:6px;width:2px;border-radius:1px;background:rgba(255,255,255,.55)}
+.tx .eL:hover,.tx .eR:hover,.tx.sel .eL,.tx.sel .eR{background:rgba(255,255,255,.34)}
+.track-lbl{position:absolute;left:-16px;font-size:9px;color:var(--muted);writing-mode:vertical-rl;transform:rotate(180deg)}
+#toast{position:fixed;left:50%;bottom:286px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:9px 14px;border-radius:9px;
+  display:none;align-items:center;gap:10px;z-index:50;box-shadow:0 8px 30px rgba(0,0,0,.5)}
+#toast button{background:transparent;color:var(--bg);border-color:rgba(0,0,0,.25);min-height:26px;padding:2px 9px}
+#busy{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:100;font-size:15px;color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">Reel <b>Studio</b></div>
+  <select id="proj" aria-label="Project"></select>
+  <input type="text" id="pname" aria-label="Reel name" title="Reel name (also the exported file name)">
+  <button id="lookBtn" title="Colour look for the whole reel">🎨 <span id="lookName">Natural</span> ▾</button>
+  <select id="fmtSel" aria-label="Format" title="Shape of the reel, in the preview and the export"></select>
+  <select id="fillSel" aria-label="Fill" title="How clips fill the frame (all shots; a shot can choose its own in its details)"></select>
+  <button id="undo" title="Undo (Ctrl+Z)">↶ Undo</button>
+  <button id="redo" title="Redo (Ctrl+Y)">↷ Redo</button>
+  <button id="dup" title="Make a copy of this reel to experiment with">Duplicate</button>
+  <button id="del" title="Delete this project">Delete</button>
+  <span class="spacer"></span>
+  <span class="pill" id="saveState">Saved</span>
+  <span class="pill" id="renderState" hidden></span>
+  <select id="expFmt" aria-label="Export format" title="Export in this shape (the reel itself doesn't change)"></select>
+  <select id="expQ" aria-label="Export quality" title="Export quality. Clips are cut from your original (mostly 4K) files, so 2K keeps detail that 1080p loses. Sharpened = gentle extra crispness that survives Instagram's compression.">
+    <option value="std">1080p</option>
+    <option value="sharp">1080p · sharpened</option>
+    <option value="2k">2K · sharpened</option>
+    <option value="4k">4K · sharpened</option>
+  </select>
+  <button class="primary" id="export">Export reel</button>
+  <a href="/carousel" title="Open Carousel Studio" style="color:var(--muted);text-decoration:none;font-size:12px;padding:4px 8px;border-radius:6px;border:1px solid var(--line);white-space:nowrap">Carousels →</a>
+</header>
+
+<div id="app">
+  <aside id="lib">
+    <div class="lib-head">
+      <select id="colSel" aria-label="Folder" title="Which footage folder the library shows (Europe trip, House Party 02…). ＋ Add a folder… brings in a new one."></select>
+      <input type="search" id="q" placeholder="Search clips: sunset, cat, train, Eiffel…">
+      <div class="row">
+        <select id="loc" style="flex:1;min-width:0"></select>
+        <div class="seg" id="orient"><button data-v="all" aria-pressed="true">All</button><button data-v="portrait" aria-pressed="false" title="Portrait">▯</button><button data-v="landscape" aria-pressed="false" title="Landscape">▭</button></div>
+      </div>
+      <div class="seg" id="kind" style="align-self:flex-start"><button data-v="all" aria-pressed="true">Videos &amp; photos</button><button data-v="video" aria-pressed="false">🎬 Videos</button><button data-v="photo" aria-pressed="false">📷 Photos</button></div>
+      <div class="chips" id="tagChips"></div>
+      <div class="chips">
+        <button class="chip tog" id="fits" aria-pressed="true" title="Only clips at least as long as the selected shot">Long enough</button>
+        <button class="chip tog" id="hideBad" aria-pressed="true">Hide unusable</button>
+        <button class="chip tog" id="usedOnly" aria-pressed="false">Used in this reel</button>
+        <label class="lbl" style="display:inline-flex;align-items:center;gap:4px"><input type="checkbox" id="autoNext"> Next shot after picking</label>
+      </div>
+      <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="lbl" id="libCount"></div>
+        <button id="warm" class="chip" style="flex:none" title="Make preview copies for every clip in this list in the background, so they play instantly">⚡ Instant previews</button></div>
+    </div>
+    <div id="libGrid"></div>
+  </aside>
+
+  <section id="stage">
+    <div class="screens">
+      <div class="screen" id="cvWrap"><canvas id="cv" width="540" height="960"></canvas><span class="tag">Your reel</span>
+        <button id="fsBtn" class="ovbtn" title="Watch your reel full screen (F)">⤢</button>
+        <div id="fsBar"><button id="fsPlay" class="playbtn primary" style="width:36px;height:36px">▶</button><div id="fsProg"><div id="fsFill"></div></div><span id="fsTime"></span><button id="fsExit" title="Exit full screen (Esc)">✕</button></div>
+      </div>
+      <div class="side" id="side">
+        <div class="tabs"><button id="tabOrig" aria-pressed="true">Original reel</button><button id="tabClip" aria-pressed="false" hidden>Clip preview</button></div>
+        <div class="sidebody">
+          <div class="screen" id="origWrap"><video id="orig" muted playsinline preload="auto"></video><span class="tag">Original</span></div>
+          <div class="clipview" id="clipWrap" hidden>
+            <div class="clipbox" id="clipBox">
+              <video id="pv" playsinline muted preload="auto" title="Click to play / pause"></video>
+              <img id="pvImg" alt="" hidden>
+              <div class="guide" id="guide" hidden><span>what a reel shows</span></div>
+              <div class="pvmsg" id="pvMsg" hidden><span></span></div>
+            </div>
+            <div class="pvpart">
+              <span class="lbl" id="pvPartLbl"></span><span class="spacer"></span>
+              <select id="pvMove" hidden title="Movement for this photo"><option value="none">Still photo</option><option value="in">Slow zoom in</option><option value="out">Slow zoom out</option></select>
+              <button class="chip tog" id="pvLoop" aria-pressed="false" title="Play only the part that goes into the shot, over and over">⟲ Loop this part</button>
+            </div>
+            <div class="pvbar" id="pvBar">
+              <button id="pvPlay" title="Play / pause this clip">▶</button>
+              <div class="pvscrub" id="pvScrub" title="Drag the teal box to choose which part goes into the shot"><div class="pvthumbs" id="pvThumbs"></div><div class="pvwin" id="pvWin"></div><div class="pvhead" id="pvHead"></div></div>
+              <span id="pvTime">0:00.0 / 0:00.0</span>
+              <button id="pvMute" title="Sound on / off">🔇</button>
+            </div>
+            <div class="pvfoot">
+              <div class="pvinfo"><b id="pvTitle"></b><div class="meta" id="pvMeta"></div></div>
+              <button class="primary" id="pvUse">Use in shot 1</button>
+              <button id="pvClose" title="Back to the original reel (Esc)">Close</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="controls">
+      <button id="prevCut" title="Previous cut (Shift+←)">⏮</button>
+      <button id="prevF" title="Previous frame (←)">◀</button>
+      <button class="playbtn primary" id="play" title="Play / pause (Space)">▶</button>
+      <button id="nextF" title="Next frame (→)">▶</button>
+      <button id="nextCut" title="Next cut (Shift+→)">⏭</button>
+      <span id="time">0:00.00 / 0:00.00</span>
+    </div>
+  </section>
+
+  <aside id="inspCol">
+    <div id="inspHead" title="Shot and text details"><button id="inspToggle" title="Hide this panel">⟩</button><span class="lbl" id="inspTitle">Details</span></div>
+    <div id="insp"></div>
+  </aside>
+</div>
+
+<footer>
+  <div class="tbar">
+    <button id="splitT" title="Split the shot at the playhead (S)">✂ Split</button>
+    <button id="mergeT" title="Join the selected shot with the next one">⇥ Merge with next</button>
+    <button id="resetBeats" title="Put every cut back on the original beats">Reset cuts to original beats</button>
+    <label class="lbl"><input type="checkbox" id="snap" checked> Snap to beats</label>
+    <span style="width:1px;height:22px;background:var(--line)"></span>
+    <button id="addText" title="Add a new text at the playhead">＋ Text</button>
+    <button id="resetText" title="Put back the original reel's text">Reset text to original</button>
+    <span class="spacer"></span>
+    <span class="lbl">Zoom</span>
+    <input type="range" id="zoom" min="1" max="14" step="0.1" style="width:140px">
+    <button id="fitTl">Fit</button>
+  </div>
+  <div id="tlScroll">
+    <div id="tl">
+      <canvas id="ruler"></canvas>
+      <div id="vtrack"></div>
+      <div id="handles"></div>
+      <div id="ttrack"></div>
+      <canvas id="wave"></canvas>
+      <div id="playhead"></div>
+    </div>
+  </div>
+</footer>
+
+<div id="toast"></div>
+<div id="lookPop" hidden>
+  <div class="row" style="justify-content:space-between;flex-wrap:nowrap">
+    <div class="seg" id="lookTabs"><button data-v="looks" aria-pressed="true">🎨 Looks</button><button data-v="adjust" aria-pressed="false">🎚 Adjust</button></div>
+    <div class="seg" id="lookScope" title="Colour the whole reel, or just the selected shot"><button data-v="reel" aria-pressed="true">Whole reel</button><button data-v="shot" aria-pressed="false">Shot 1 only</button></div>
+  </div>
+  <div class="row" id="lookNote" style="margin-top:8px;min-height:28px;flex-wrap:nowrap"></div>
+  <div id="lookPane">
+    <div class="row" style="flex-wrap:nowrap;margin:6px 0 10px"><span class="lbl">Strength</span><input type="range" id="lookAmt" min="0" max="1" step="0.01"><span class="meta" id="lookAmtV" style="min-width:40px;text-align:right">100%</span></div>
+    <div class="chips" id="lookCats" style="margin-bottom:10px"></div>
+    <div id="lookGrid"></div>
+  </div>
+  <div id="adjPane" hidden></div>
+</div>
+<div id="txEdit" hidden>
+  <textarea id="teT" rows="1" spellcheck="false" aria-label="Text"></textarea>
+  <div class="swatches" id="teCol"></div>
+  <div class="row" style="flex-wrap:nowrap"><select id="teStyle" style="flex:1;min-width:0" aria-label="Text style"></select>
+    <button id="teSm" title="Smaller">A−</button><button id="teLg" title="Bigger">A+</button></div>
+  <div class="row" style="flex-wrap:nowrap"><button id="teMore" title="Timing, animation and position">More settings</button><button id="teDel" title="Delete this text">Delete</button><span class="spacer"></span><button class="primary" id="teDone">Done</button></div>
+  <div class="hint" style="margin:0">Enter = done · Shift+Enter = new line · Esc = undo these changes</div>
+</div>
+<div id="busy">Loading Reel Studio…</div>
+
+<script>
+const FPS = 30;
+const TAGS = ['Scenery','Water','City','Landmark','Walking','People','Selfie','Food','Transport','Indoor','Night','Sunset','Detail','Animals'];
+const S = {lib:[], byId:{}, templates:{}, starters:{}, projects:[], p:null, T:null, sel:0, frame:0, playing:false,
+  hist:[], fut:[], ppf:4, showOrig:true, styles:{}, selText:null, hoverLook:null};
+const LF = {q:'', col:'all', loc:'all', orient:'all', kind:'all', tags:new Set(), fits:true, hideBad:true, usedOnly:false, shown:120};
+try { LF.col = localStorage.getItem('rs-col') || 'all'; } catch (e) {}
+const isPhoto = c => !!c && c.kind === 'photo';
+const SWATCHES = ['#ffffff', '#fff4d6', '#f7e8a6', '#f2b21b', '#ff8a3d', '#ff4d4d', '#ff7eb6', '#b78cff', '#6cb8ff', '#23d4c4', '#7ee081', '#111111'];
+const $ = q => document.querySelector(q);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const fmt = f => { const s = f / FPS; return Math.floor(s / 60) + ':' + (s % 60).toFixed(2).padStart(5, '0'); };
+const fmtS = s => s < 60 ? s.toFixed(s < 10 ? 1 : 0) + 's' : Math.floor(s / 60) + ':' + String(Math.round(s % 60)).padStart(2, '0');
+const pad = (n, w) => String(n).padStart(w, '0');
+async function api(url, body) {
+  const r = await fetch(url, body ? {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)} : {});
+  const j = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(j.error || r.statusText);
+  return j;
+}
+let toastT;
+function toast(html, ms = 2600) {
+  const t = $('#toast'); t.innerHTML = html; t.style.display = 'flex';
+  clearTimeout(toastT); if (ms) toastT = setTimeout(() => t.style.display = 'none', ms);
+}
+
+// ------------------------------------------------------------------ media helpers
+const thumbCache = {};
+function thumbUrl(c, k) { return isPhoto(c) ? `/pthumb/${c.id}.jpg` : `/thumbs/${pad(c.id, 4)}_${pad(k, 2)}.jpg`; }
+function thumbAt(c, t) { const k = clamp(Math.floor(t / Math.max(c.d, 0.01) * c.n), 0, Math.max(0, c.n - 1)); return thumbUrl(c, k); }
+function thumbImg(url) {
+  let im = thumbCache[url];
+  if (!im) { im = thumbCache[url] = new Image(); im.onload = () => { if (!S.playing) paint(S.frame); }; im.src = url; }
+  return im;
+}
+const audio = new Audio(); audio.preload = 'auto';
+const orig = $('#orig');
+const origRef = document.createElement('video'); origRef.muted = true; origRef.preload = 'auto';
+
+const proxyState = {}, proxyWait = {};
+function ensureProxy(id) {
+  if (proxyWait[id]) return proxyWait[id];
+  proxyWait[id] = new Promise(res => {
+    const tick = async () => {
+      let r; try { r = await api('/api/proxy?id=' + id); } catch (e) { r = {status:'error'}; }
+      const changed = proxyState[id] !== r.status; proxyState[id] = r.status;
+      if (r.status === 'ready') { res(r.url); renderTimeline(); if (S.p && S.p.slots[S.sel] && S.p.slots[S.sel].clip === id) renderInspector(); return; }
+      if (r.status === 'error') { res(null); renderTimeline(); return; }
+      if (changed) renderTimeline();
+      setTimeout(tick, 1000);
+    };
+    tick();
+  });
+  return proxyWait[id];
+}
+// Small media files are downloaded whole into memory. Browsers only allow ~6 open connections per site,
+// and video elements that stream keep theirs open - with 20+ shots that starved everything else.
+const blobCache = new Map();
+function blobUrl(url) {
+  if (!blobCache.has(url)) {
+    blobCache.set(url, fetch(url).then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.blob(); })
+      .then(b => URL.createObjectURL(b)).catch(e => { blobCache.delete(url); throw e; }));
+  }
+  return blobCache.get(url);
+}
+let vids = [];
+function makeVid(id) {
+  if (isPhoto(S.byId[id])) {                  // photos: one picture, loaded once
+    const el = new Image(), o = {clip:id, el, ready:false, photo:true};
+    blobUrl(`/pprev/${id}.jpg`).then(u => { el.onload = () => { o.ready = true; if (!S.playing) paint(S.frame); }; el.src = u; }).catch(() => {});
+    return o;
+  }
+  const el = document.createElement('video'); el.muted = true; el.preload = 'auto'; el.playsInline = true;
+  const o = {clip:id, el, ready:false};
+  ensureProxy(id).then(url => url && blobUrl(url)).then(bu => {
+    if (!bu) return;
+    el.addEventListener('loadeddata', () => { o.ready = true; if (!S.playing) showFrame(S.frame); }, {once:true});
+    el.src = bu;
+  }).catch(() => {});
+  return o;
+}
+function syncVideos() {
+  const n = S.p.slots.length;
+  for (let k = 0; k < n; k++) {
+    const s = S.p.slots[k];
+    if (!vids[k] || vids[k].clip !== s.clip) { if (vids[k]) vids[k].el.removeAttribute('src'); vids[k] = makeVid(s.clip); }
+  }
+  for (let k = n; k < vids.length; k++) if (vids[k]) vids[k].el.removeAttribute('src');
+  vids.length = n;
+}
+
+// ------------------------------------------------------------------ timing / framing math
+function bounds() { return [0, ...S.p.cuts, S.T.total]; }
+function slotAt(f) { const b = bounds(); for (let k = 0; k < b.length - 1; k++) if (f < b[k + 1]) return k; return b.length - 2; }
+function slotDur(k) { const b = bounds(); return (b[k + 1] - b[k]) / FPS; }
+// speed: 0.5 = slow motion (uses half as much of the clip), 2 = twice as fast. The shot's length on the beat never changes.
+const SPEEDS = [0.25, 0.5, 0.75, 1, 1.5, 2, 3, 4];
+function speedOf(s) { const v = +(s && s.speed) || 1; return SPEEDS.includes(v) ? v : 1; }
+function inStart(s, c, dur) { return clamp(s.in || 0, 0, Math.max(0, c.d - dur * speedOf(s))); }
+function srcTime(k, f) {
+  const b = bounds(), s = S.p.slots[k], c = S.byId[s.clip], sp = speedOf(s), dur = (b[k + 1] - b[k]) / FPS, local = (f - b[k]) / FPS * sp;
+  const st = inStart(s, c, dur);
+  const t = s.reverse ? st + dur * sp - local : st + local;
+  return clamp(t, 0, Math.max(0, c.d - 0.04));
+}
+// ---------- the reel's shape (Format) and how each shot fills it (same as REEL_FORMATS / fit_mode() / rot_of() in studio.py)
+const FORMATS = {'9:16': [1080, 1920, '9:16 · Reels / Stories'], '4:5': [1080, 1350, '4:5 · Feed'], '1:1': [1080, 1080, '1:1 · Square'], '16:9': [1920, 1080, '16:9 · Landscape']};
+const FILLS = [['crop', 'Crop to fill'], ['blur', 'Whole clip · blurred fill'], ['bars', 'Whole clip · black bars']];
+let FW = 1080, FH = 1920, FA = 9 / 16, TK = 1, VW = 1080, VH = 1920;   // frame size; texts are laid out on a VW x VH frame (see textScale)
+function fmtOf(p) { return p && FORMATS[p.format] ? p.format : '9:16'; }
+function setFormatVars() {
+  [FW, FH] = FORMATS[fmtOf(S.p)]; FA = FW / FH;
+  TK = Math.min(FW / 1080, FH / 1920); VW = FW / TK; VH = FH / TK;     // same as text_frames() in studio.py
+}
+function fitMode(s) { const f = s && s.fit; return f === true || f === 'bars' ? 'bars' : (f === 'blur' || f === 'crop') ? f : ((S.p && S.p.fill) || 'crop'); }
+function rotOf(s) { const r = (((+(s && s.rot) || 0) % 360) + 360) % 360; return [90, 180, 270].includes(r) ? r : 0; }
+function rdims(w, h, s) { return rotOf(s) % 180 ? [h, w] : [w, h]; }
+function cropRect(sw, sh, s, zoom, fa = FA) {
+  let bw, bh; if (sw / sh > fa) { bh = sh; bw = sh * fa; } else { bw = sw; bh = sw / fa; }
+  const z = Math.max(1, zoom ?? s.zoom ?? 1), w = bw / z, h = bh / z;
+  const x = clamp((s.cx ?? 0.5) * sw - w / 2, 0, sw - w), y = clamp((s.cy ?? 0.5) * sh - h / 2, 0, sh - h);
+  return {x, y, w, h};
+}
+function normalizeCrop(s, c) {
+  const [w, h] = rdims(c.w, c.h, s), r = cropRect(w, h, s);
+  s.cx = +((r.x + r.w / 2) / w).toFixed(4); s.cy = +((r.y + r.h / 2) / h).toFixed(4);
+}
+// slow zoom on photos: extra zoom at frame f (same formula as move_zoom() in studio.py)
+function moveAt(k, f) {
+  const s = S.p.slots[k]; if (!s.move || s.move === 'none' || !isPhoto(S.byId[s.clip])) return 1;
+  const b = bounds(), n = b[k + 1] - b[k], p = n > 1 ? clamp((f - b[k]) / (n - 1), 0, 1) : 0;
+  return s.move === 'in' ? 1 + 0.08 * p : 1.08 - 0.08 * p;
+}
+
+// ------------------------------------------------------------------ colour looks: WebGL, same maths as look_rgb() in studio.py
+const LOOKS = {}; let lookList = [];
+function makeGL(w, h) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const gl = c.getContext('webgl2', {preserveDrawingBuffer: true, antialias: false});
+  if (!gl) return null;
+  const sh = (type, src) => { const s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(s)); return s; };
+  const prog = gl.createProgram();
+  gl.attachShader(prog, sh(gl.VERTEX_SHADER, `#version 300 es
+in vec2 a; uniform vec4 uRect; out vec2 vUv;
+void main() { vUv = vec2(mix(uRect.x, uRect.z, a.x), mix(uRect.y, uRect.w, a.y)); gl_Position = vec4(a.x * 2.0 - 1.0, 1.0 - a.y * 2.0, 0.0, 1.0); }`));
+  gl.attachShader(prog, sh(gl.FRAGMENT_SHADER, `#version 300 es
+precision highp float;
+uniform sampler2D uTex; in vec2 vUv; out vec4 o;
+// p = exp, gam, temp, tint, con, sat, vib, mono, fade, hl, sd, sh.rgb, hi.rgb, amount  (uA = the look, uB = the sliders)
+uniform float uA[18], uB[18]; uniform vec2 uCanvas; uniform float uVig, uGrain, uSeed, uLod, uDim; uniform int uRot;
+const vec3 LW = vec3(0.2126, 0.7152, 0.0722);
+vec3 grade(vec3 c0, float p[18]) {
+  vec3 c = c0 * exp2(p[0]);
+  if (p[1] != 1.0) c = pow(max(c, 0.0), vec3(1.0 / p[1]));
+  c.r *= 1.0 + 0.1 * p[2]; c.b *= 1.0 - 0.1 * p[2]; c.g *= 1.0 - 0.06 * p[3];
+  c = (c - 0.5) * p[4] + 0.5;
+  if (p[9] != 0.0 || p[10] != 0.0) { float t = clamp(dot(c, LW), 0.0, 1.0); c += 0.35 * (p[10] * 4.0 * t * (1.0 - t) * (1.0 - t) + p[9] * 4.0 * t * t * (1.0 - t)); }
+  float l = dot(c, LW), sat = p[5];
+  if (p[6] != 0.0) sat *= 1.0 + p[6] * (1.0 - clamp(max(max(c.r, c.g), c.b) - min(min(c.r, c.g), c.b), 0.0, 1.0));
+  c = l + (c - l) * sat;
+  if (p[7] != 0.0) c = mix(c, vec3(dot(c, LW)), p[7]);
+  l = clamp(dot(c, LW), 0.0, 1.0);
+  c += vec3(p[11], p[12], p[13]) * (1.0 - l) * (1.0 - l) + vec3(p[14], p[15], p[16]) * l * l;
+  c = p[8] + c * (1.0 - p[8]);
+  return mix(c0, clamp(c, 0.0, 1.0), p[17]);
+}
+void main() {
+  vec2 uv = vUv;                        // vUv is in the turned picture; uRot = quarter turns clockwise (same as transpose in studio.py)
+  if (uRot == 1) uv = vec2(vUv.y, 1.0 - vUv.x); else if (uRot == 2) uv = 1.0 - vUv; else if (uRot == 3) uv = vec2(1.0 - vUv.y, vUv.x);
+  vec3 t0 = uLod > 0.0 ? textureLod(uTex, uv, uLod).rgb : texture(uTex, uv).rgb;   // uLod: very soft copy for the blurred fill
+  vec3 c = grade(grade(t0, uA), uB) * uDim;
+  if (uVig > 0.0) {                     // same formula as vignette_png() in studio.py
+    vec2 q = (gl_FragCoord.xy / uCanvas - 0.5) * 2.0;
+    float s = clamp((length(q) / 1.41421356 - 0.3) / 0.7, 0.0, 1.0);
+    c *= 1.0 - clamp(uVig * 0.85 * s * s, 0.0, 1.0);
+  }
+  if (uGrain > 0.0) {
+    float n = fract(sin(dot(gl_FragCoord.xy + vec2(uSeed * 17.13, uSeed * 7.31), vec2(12.9898, 78.233))) * 43758.5453);
+    c += (n - 0.5) * 0.16 * uGrain;
+  }
+  o = vec4(clamp(c, 0.0, 1.0), 1.0);
+}`));
+  gl.linkProgram(prog); if (!gl.getProgramParameter(prog, gl.LINK_STATUS)) throw new Error(gl.getProgramInfoLog(prog));
+  gl.useProgram(prog);
+  const buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([0, 0, 1, 0, 0, 1, 1, 1]), gl.STATIC_DRAW);
+  const loc = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+  const tex = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, tex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  const U = {}; for (const n of ['uRect', 'uA', 'uB', 'uCanvas', 'uVig', 'uGrain', 'uSeed', 'uLod', 'uDim', 'uRot']) U[n] = gl.getUniformLocation(prog, n);
+  return {canvas: c, gl, U, src: null};
+}
+let GL = null, GLT = null;
+try { GL = makeGL(540, 960); GLT = makeGL(116, 206); } catch (e) { console.warn('No WebGL colour preview', e); GL = GLT = null; }
+// ---------- the "Adjust" sliders: same maths as adj_params() / split_rgb() in studio.py
+const ADJ = [['exp', 'Exposure', -1.5, 1.5, 0.01, 'Light'], ['con', 'Contrast', -0.6, 0.6, 0.01, 'Light'], ['hl', 'Highlights', -1, 1, 0.01, 'Light'],
+  ['sd', 'Shadows', -1, 1, 0.01, 'Light'], ['fade', 'Fade (film)', 0, 0.25, 0.005, 'Light'],
+  ['temp', 'Temperature', -1, 1, 0.01, 'Colour'], ['tint', 'Tint', -1, 1, 0.01, 'Colour'], ['sat', 'Saturation', -1, 1, 0.01, 'Colour'], ['vib', 'Vibrance', -1, 1, 0.01, 'Colour'],
+  ['sth', 'Shadows colour', 0, 360, 1, 'Split toning'], ['sta', 'Shadows amount', 0, 1, 0.01, 'Split toning'],
+  ['hih', 'Highlights colour', 0, 360, 1, 'Split toning'], ['hia', 'Highlights amount', 0, 1, 0.01, 'Split toning']];
+const FX = [['vig', 'Vignette'], ['grain', 'Film grain']];
+function hueRgb(h) { const ch = n => { const k = (n + h / 60) % 6; return 1 - Math.max(0, Math.min(k, 4 - k, 1)); }; return [ch(5), ch(3), ch(1)]; }
+function splitRgb(h, a) { const c = hueRgb(h), m = (c[0] + c[1] + c[2]) / 3; return c.map(v => (v - m) * a * 0.16); }
+function hasAdj(a) { return !!a && Object.values(a).some(v => +v); }
+function adjParams(a) { const g = k => +(a && a[k]) || 0;
+  return {exp: g('exp'), con: 1 + g('con'), hl: g('hl'), sd: g('sd'), sat: 1 + g('sat'), vib: g('vib'), temp: g('temp'), tint: g('tint'), fade: g('fade'),
+    sh: splitRgb(g('sth'), g('sta')), hi: splitRgb(g('hih'), g('hia'))}; }
+function packLook(P, amt) { const v = (k, d) => P[k] ?? d, sh = v('sh', [0, 0, 0]), hi = v('hi', [0, 0, 0]);
+  return new Float32Array([v('exp', 0), v('gam', 1), v('temp', 0), v('tint', 0), v('con', 1), v('sat', 1), v('vib', 0), v('mono', 0), v('fade', 0), v('hl', 0), v('sd', 0), sh[0], sh[1], sh[2], hi[0], hi[1], hi[2], amt]); }
+// draw one shot's picture with its colour (C = {grade, amt, adj}) into G's canvas; fx = {vig, grain, seed}
+function glDraw(G, src, sw, sh, s, C, move, fx) {
+  const gl = G.gl, W = G.canvas.width, H = G.canvas.height;
+  if (G.src !== src || src instanceof HTMLVideoElement) {     // pictures are uploaded once, video frames every time
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, src); gl.generateMipmap(gl.TEXTURE_2D); G.src = src;
+  }
+  gl.viewport(0, 0, W, H); gl.clearColor(0, 0, 0, 1); gl.clear(gl.COLOR_BUFFER_BIT);
+  const adj = hasAdj(C.adj), [rw, rh] = rdims(sw, sh, s), mode = fitMode(s), fa = W / H;
+  gl.uniform1fv(G.U.uA, packLook(LOOKS[C.grade]?.p || {}, C.amt ?? 1));
+  gl.uniform1fv(G.U.uB, packLook(adj ? adjParams(C.adj) : {}, adj ? 1 : 0));
+  gl.uniform2f(G.U.uCanvas, W, H);
+  gl.uniform1f(G.U.uVig, fx?.vig || 0); gl.uniform1f(G.U.uGrain, fx?.grain || 0); gl.uniform1f(G.U.uSeed, fx?.seed || 0);
+  gl.uniform1i(G.U.uRot, rotOf(s) / 90); gl.uniform1f(G.U.uLod, 0); gl.uniform1f(G.U.uDim, 1);
+  const rectOf = r => gl.uniform4f(G.U.uRect, r.x / rw, r.y / rh, (r.x + r.w) / rw, (r.y + r.h) / rh);
+  if (mode === 'crop') { rectOf(cropRect(rw, rh, s, (s.zoom || 1) * move, fa)); gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4); return; }
+  if (mode === 'blur') {                        // a soft, slightly darker copy covering the frame (same idea as frame_filter in studio.py)
+    rectOf(cropRect(rw, rh, {}, 1, fa));
+    gl.uniform1f(G.U.uLod, Math.max(1, Math.log2(Math.max(sw, sh) / 22))); gl.uniform1f(G.U.uDim, 0.86);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    gl.uniform1f(G.U.uLod, 0); gl.uniform1f(G.U.uDim, 1);
+  }
+  const sc = Math.min(W / rw, H / rh) * move, dw = rw * sc, dh = rh * sc;   // the whole clip, centred
+  gl.viewport(Math.round((W - dw) / 2), Math.round((H - dh) / 2), Math.round(dw), Math.round(dh)); gl.uniform4f(G.U.uRect, 0, 0, 1, 1);
+  gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+}
+function curLook() { return S.p ? (LOOKS[S.p.grade] ? S.p.grade : (LOOKS[S.T.grade] ? S.T.grade : 'natural')) : 'natural'; }
+function curAmt() { return S.p ? (S.p.grade_amt ?? 1) : 1; }
+// the colour a shot uses: its own (if it has one) or the reel's
+function colourOf(k) { const s = S.p.slots[k]; return s && s.look ? s.look : {grade: curLook(), amt: curAmt(), adj: S.p.adj || {}}; }
+
+// ------------------------------------------------------------------ preview drawing
+const cv = $('#cv'), ctx = cv.getContext('2d');
+// ---------- text layers: the server draws each text once (same code as the export); we place, reveal and fade it here
+const textRes = new Map(), lastRes = new Map();
+function rkey(L) { const st = S.styles[L.style] || {}; return JSON.stringify([L.text, L.style, L.size | 0, Math.round((L.xs ?? st.xs ?? 1) * 1000), st.arc ? (L.r || 542) : 0, L.color || '']); }
+function loadImg(u) { const im = new Image(); im.onload = () => { if (!S.playing) paint(S.frame); }; im.src = u; return im; }
+function getRes(L) {
+  const k = rkey(L); let r = textRes.get(k);
+  if (!r) {
+    r = {ready:false}; textRes.set(k, r);
+    api('/api/text', L).then(m => {
+      r.lines = m.lines.map(l => ({...l, img: l.f ? loadImg('/text/' + l.f) : null}));
+      r.states = m.states.map(s => ({...s, img: loadImg('/text/' + s.f)}));
+      r.wordEnds = m.wordEnds; r.ready = true;
+      if (!S.playing) paint(S.frame);
+    }).catch(() => textRes.delete(k));
+  }
+  if (r.ready) { lastRes.set(L.id, r); return r; }
+  return lastRes.get(L.id) || null;          // show the previous look while a new one is drawn
+}
+const textById = id => S.p.texts.find(L => L.id === id);
+function layerAlpha(L, f) {
+  let a = 1; const k = f - L.f0;
+  if (L.anim_in === 'fade') a = Math.min(1, (k + 1) / Math.max(1, L.in_frames || 12));
+  if (L.anim_out === 'fade') { const end = L.fade_end ?? L.f1, r = (end - f) / Math.max(0.5, L.out_frames || 6); if (r < 1) a *= Math.max(0, r); }
+  return a;
+}
+function layerVisible(L, f, R) {
+  const k = f - L.f0;
+  if (L.anim_in === 'type') return Math.floor(k / FPS * (L.cps || 30)) + 1;
+  if (L.anim_in === 'words') {
+    let w = L.wframes ? L.wframes.filter(t => k >= t).length : 1 + Math.floor(k / Math.max(1, L.wstep || 7));
+    w = Math.max(1, w);
+    if (R.states.length) return Math.min(w, R.states.length);
+    return w >= R.wordEnds.length ? null : R.wordEnds[w - 1];
+  }
+  return R.states.length ? R.states.length : null;
+}
+function layerRect(L, R) {
+  if (R.states.length) { const s = R.states[R.states.length - 1]; return {x: L.x * VW - s.ox, y: L.y * VH - s.oy, w: s.w, h: s.h}; }
+  let x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9; const n = R.lines.length, lg = (L.lh || 1.15) * L.size;
+  R.lines.forEach((ln, k) => { if (!ln.img) return; const cy = L.y * VH + (k - (n - 1) / 2) * lg;
+    x0 = Math.min(x0, L.x * VW - ln.w / 2); x1 = Math.max(x1, L.x * VW + ln.w / 2); y0 = Math.min(y0, cy - ln.h / 2); y1 = Math.max(y1, cy + ln.h / 2); });
+  return x0 > x1 ? null : {x: x0, y: y0, w: x1 - x0, h: y1 - y0};
+}
+function drawLayer(g, L, R, vis, alpha, sc) {
+  const st = S.styles[L.style] || S.styles.clean;
+  g.save(); g.globalAlpha = alpha;
+  if (R.states.length) {
+    const s = R.states[Math.max(1, vis || 1) - 1];
+    if (s && s.img.complete) g.drawImage(s.img, (L.x * VW - s.ox) * sc, (L.y * VH - s.oy) * sc, s.w * sc, s.h * sc);
+    g.restore(); return;
+  }
+  const [r, gg, b, a] = st.shadow;
+  g.shadowColor = `rgba(${r},${gg},${b},${(a / 255) * (a / 255)})`; g.shadowBlur = st.blur * 2 * sc; g.shadowOffsetX = st.off[0] * sc; g.shadowOffsetY = st.off[1] * sc;
+  const n = R.lines.length, lg = (L.lh || 1.15) * L.size; let rem = vis;
+  for (let k = 0; k < n; k++) {
+    const ln = R.lines[k];
+    if (rem !== null && rem <= 0) break;
+    const take = rem === null ? ln.n : Math.min(rem, ln.n);
+    if (rem !== null) rem -= take;
+    if (!ln.img || take <= 0 || !ln.img.complete) continue;
+    let cw = ln.w; if (take < ln.n) { cw = ln.cuts[take - 1]; if (cw <= 0) continue; }
+    cw = Math.min(cw, ln.w);
+    const cy = L.y * VH + (k - (n - 1) / 2) * lg, left = L.x * VW - ln.w / 2;
+    g.drawImage(ln.img, 0, 0, cw, ln.h, left * sc, (cy - ln.h / 2) * sc, cw * sc, ln.h * sc);
+  }
+  g.restore();
+}
+function drawTexts(f, g, sc) {
+  for (const L of S.p.texts) {
+    if (f < L.f0 || f >= L.f1 || !L.text.trim()) continue;
+    const R = getRes(L); if (!R) continue;
+    const a = layerAlpha(L, f); if (a <= 0) continue;
+    drawLayer(g, L, R, layerVisible(L, f, R), a, sc);
+  }
+  const L = S.selText && textById(S.selText);
+  if (L && !S.playing && !isFs() && f >= L.f0 && f < L.f1) {
+    const R = getRes(L), rc = R && layerRect(L, R);
+    if (rc) { g.save(); g.strokeStyle = '#23d4c4'; g.lineWidth = 1.5; g.setLineDash([6, 4]); g.strokeRect((rc.x - 10) * sc, (rc.y - 8) * sc, (rc.w + 20) * sc, (rc.h + 16) * sc); g.restore(); }
+  }
+}
+// the picture for shot k at frame f: its video/photo when loaded, otherwise a small thumbnail
+function slotSource(k, f) {
+  const s = S.p.slots[k], v = vids[k], c = S.byId[s.clip];
+  if (v && v.ready) {
+    if (v.photo && v.el.naturalWidth) return {src: v.el, sw: v.el.naturalWidth, sh: v.el.naturalHeight};
+    if (!v.photo && v.el.readyState >= 2 && v.el.videoWidth) return {src: v.el, sw: v.el.videoWidth, sh: v.el.videoHeight};
+  }
+  const im = thumbImg(thumbAt(c, srcTime(k, f)));
+  return im.complete && im.naturalWidth ? {src: im, sw: im.naturalWidth, sh: im.naturalHeight} : null;
+}
+function drawShot(g, W, H, info, s, C, move, fx) {
+  if (GL) {
+    if (GL.canvas.width !== W || GL.canvas.height !== H) { GL.canvas.width = W; GL.canvas.height = H; }
+    glDraw(GL, info.src, info.sw, info.sh, s, C, move, fx); g.drawImage(GL.canvas, 0, 0); return;
+  }
+  const {src, sw, sh} = info;                   // no WebGL: draw without the colour look, blur or rotation
+  if (fitMode(s) !== 'crop') { const sc = Math.min(W / sw, H / sh) * move, dw = sw * sc, dh = sh * sc; g.drawImage(src, (W - dw) / 2, (H - dh) / 2, dw, dh); }
+  else { const r = cropRect(sw, sh, s, (s.zoom || 1) * move, W / H); g.drawImage(src, r.x, r.y, r.w, r.h, 0, 0, W, H); }
+}
+function paint(f) {
+  if (!S.p) return;
+  const k = slotAt(f), s = S.p.slots[k], W = cv.width, H = cv.height;
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  const info = slotSource(k, f);
+  let C = colourOf(k);
+  if (S.hoverLook && (LK.scope === 'shot' ? k === S.sel : !s.look)) C = {...C, grade: S.hoverLook, amt: C.amt || 1};   // trying a look
+  const fx = S.p.fx || {};
+  if (info) drawShot(ctx, W, H, info, s, C, moveAt(k, f), {vig: fx.vig, grain: fx.grain, seed: f % 997});
+  drawTexts(f, ctx, W / VW);
+  cv.classList.toggle('fit', fitMode(s) !== 'crop');
+}
+function showFrame(f) {
+  if (!S.p) return;
+  f = clamp(Math.round(f), 0, S.T.total - 1);
+  S.frame = f;
+  const k = slotAt(f), v = vids[k];
+  if (v && v.ready && !v.photo) {
+    const t = srcTime(k, f);
+    if (Math.abs(v.el.currentTime - t) > 0.017) { v.el.onseeked = () => { v.el.onseeked = null; if (!S.playing) paint(S.frame); }; v.el.currentTime = t; }
+  }
+  paint(f); updatePlayhead();
+  if (S.showOrig && !S.playing && orig.readyState >= 1) { const t = f / FPS; if (Math.abs(orig.currentTime - t) > 0.02) orig.currentTime = t; }
+}
+
+// ------------------------------------------------------------------ playback
+let raf = 0, active = -1;
+function play() {
+  if (S.playing || !S.p) return;
+  if (S.frame >= S.T.total - 1) S.frame = 0;
+  pv.pause();
+  S.playing = true; setPlayBtn();
+  const b = bounds(), k0 = slotAt(S.frame);
+  S.p.slots.forEach((s, k) => { const v = vids[k]; if (v && v.ready && !v.photo && k !== k0) { v.el.pause(); v.el.currentTime = srcTime(k, b[k]); } });
+  active = -1;
+  audio.currentTime = S.frame / FPS;
+  audio.play().catch(() => {});
+  if (S.showOrig) { orig.currentTime = S.frame / FPS; orig.play().catch(() => {}); }
+  raf = requestAnimationFrame(loop);
+}
+function loop() {
+  if (!S.playing) return;
+  const pos = audio.currentTime * FPS;
+  if (audio.ended || pos >= S.T.total - 0.5) { stop(); S.frame = S.T.total - 1; showFrame(S.frame); return; }
+  const f = clamp(Math.floor(pos), 0, S.T.total - 1), k = slotAt(f), s = S.p.slots[k], v = vids[k];
+  if (k !== active) {
+    if (active >= 0 && vids[active] && !vids[active].photo) vids[active].el.pause();
+    active = k;
+    if (v && v.ready && !v.photo) { v.el.currentTime = srcTime(k, f); v.el.playbackRate = speedOf(s); if (!s.reverse) v.el.play().catch(() => {}); }
+  } else if (v && v.ready && !v.photo) {
+    const t = srcTime(k, f);
+    if (s.reverse) { if (!v.el.seeking && Math.abs(v.el.currentTime - t) > 0.04) v.el.currentTime = t; }
+    else if (Math.abs(v.el.currentTime - t) > 0.2) v.el.currentTime = t;
+  }
+  if (S.showOrig && Math.abs(orig.currentTime - audio.currentTime) > 0.15) orig.currentTime = audio.currentTime;
+  S.frame = f; paint(f); updatePlayhead();
+  raf = requestAnimationFrame(loop);
+}
+function stop() {
+  if (!S.playing) return;
+  S.playing = false; cancelAnimationFrame(raf);
+  audio.pause(); orig.pause(); vids.forEach(v => v && !v.photo && v.el.pause());
+  setPlayBtn(); showFrame(S.frame);
+}
+function toggle() { S.playing ? stop() : play(); }
+function setPlayBtn() { $('#play').textContent = S.playing ? '❚❚' : '▶'; }
+
+// ------------------------------------------------------------------ history + saving
+function snapshot() { return JSON.stringify(S.p); }
+function pushHist() { S.hist.push(snapshot()); if (S.hist.length > 200) S.hist.shift(); S.fut = []; updUndo(); }
+function undo() { if (!S.hist.length) return; S.fut.push(snapshot()); S.p = JSON.parse(S.hist.pop()); S.sel = Math.min(S.sel, S.p.slots.length - 1); afterChange(); updUndo(); }
+function redo() { if (!S.fut.length) return; S.hist.push(snapshot()); S.p = JSON.parse(S.fut.pop()); S.sel = Math.min(S.sel, S.p.slots.length - 1); afterChange(); updUndo(); }
+function updUndo() { $('#undo').disabled = !S.hist.length; $('#redo').disabled = !S.fut.length; }
+let saveT = 0, saving = Promise.resolve();
+function markDirty() { $('#saveState').textContent = 'Saving…'; clearTimeout(saveT); saveT = setTimeout(save, 500); }
+function save() {
+  clearTimeout(saveT);
+  saving = saving.then(async () => {
+    try {
+      const r = await api('/api/project', S.p);
+      S.p.id = r.id; S.p.updated = r.updated;
+      const i = S.projects.findIndex(x => x.id === S.p.id), copy = JSON.parse(snapshot());
+      if (i >= 0) S.projects[i] = copy; else S.projects.push(copy);
+      $('#saveState').textContent = 'All changes saved'; renderProjects();
+    } catch (e) { $('#saveState').textContent = 'Not saved: ' + e.message; }
+  });
+  return saving;
+}
+function afterChange() {
+  syncVideos(); renderHeader(); renderTimeline(); renderInspector(); renderLib(); showFrame(S.frame); markDirty();
+  if (!$('#lookPop').hidden) { syncLookPop(); queueThumbs(); }
+}
+
+// ------------------------------------------------------------------ projects
+function renderProjects() {
+  const groups = {};
+  S.projects.forEach(p => (groups[p.template] = groups[p.template] || []).push(p));
+  let h = '';
+  Object.keys(S.templates).forEach(k => {
+    if (!groups[k]) return;
+    const T = S.templates[k];
+    h += `<optgroup label="${T.song === false ? '' : 'Song: '}${esc(T.title)}">` + groups[k].map(p => `<option value="${p.id}" ${S.p && p.id === S.p.id ? 'selected' : ''}>${esc(p.name)}</option>`).join('') + '</optgroup>';
+  });
+  h += '<optgroup label="Start a new reel">' + Object.values(S.templates).map(t => `<option value="new:${t.key}">+ New reel on “${esc(t.title)}”</option>`).join('') + '</optgroup>';
+  $('#proj').innerHTML = h;
+}
+// ---------- Format (shape) and Fill, for the preview and the export
+let shownFmt = '';
+function sizeCanvas(big) { const k = big ? 1 : 0.5; cv.width = Math.round(FW * k); cv.height = Math.round(FH * k); }
+function sizeScreen() {                         // non-vertical reels: fit the preview box to the space next to the side panel
+  const w = $('#cvWrap'); if (!w || isFs()) return;
+  if (fmtOf(S.p) === '9:16') { w.classList.remove('sized'); w.style.width = w.style.height = ''; return; }
+  const box = document.querySelector('.screens'), availW = box.clientWidth - 230 - 18, availH = box.clientHeight;
+  let hh = availH, ww = hh * FA; if (ww > availW) { ww = Math.max(160, availW); hh = ww / FA; }
+  w.classList.add('sized'); w.style.width = Math.floor(ww) + 'px'; w.style.height = Math.floor(hh) + 'px';
+}
+function applyFormat() {
+  const key = fmtOf(S.p); if (key === shownFmt) return;
+  shownFmt = key; setFormatVars();
+  document.documentElement.style.setProperty('--ar', `${FW} / ${FH}`);
+  sizeCanvas(isFs()); sizeScreen();
+  if (!$('#clipWrap').hidden) layoutGuide();
+}
+new ResizeObserver(() => sizeScreen()).observe(document.querySelector('.screens'));
+$('#fmtSel').innerHTML = Object.entries(FORMATS).map(([k, f]) => `<option value="${k}">▭ ${f[2]}</option>`).join('');
+$('#fillSel').innerHTML = FILLS.map(([k, t]) => `<option value="${k}">${t}</option>`).join('');
+$('#expFmt').innerHTML = '<option value="">Export: as shown</option>' + Object.entries(FORMATS).map(([k, f]) => `<option value="${k}">Export: ${f[2]}</option>`).join('');
+// export quality is remembered on this computer (2K by default: sharper, from the original 4K clips)
+{ let q = null; try { q = localStorage.getItem('rs-quality'); } catch (e) {}
+  $('#expQ').value = ['std', 'sharp', '2k', '4k'].includes(q) ? q : '2k';
+  $('#expQ').onchange = () => { try { localStorage.setItem('rs-quality', $('#expQ').value); } catch (e) {} }; }
+$('#fmtSel').addEventListener('change', e => { pushHist(); S.p.format = e.target.value; afterChange(); toast(`Reel shape: ${FORMATS[S.p.format][2]}. Texts and crops follow; export uses it too.`); });
+$('#fillSel').addEventListener('change', e => {
+  pushHist(); S.p.fill = e.target.value; S.p.slots.forEach(s => { delete s.fit; }); afterChange();
+  toast(`Every shot: ${FILLS.find(f => f[0] === S.p.fill)[1]}. A shot can still choose its own in its details.`);
+});
+function renderHeader() {
+  applyFormat();
+  $('#fmtSel').value = fmtOf(S.p); $('#fillSel').value = S.p.fill || 'crop';
+  $('#pname').value = S.p.name;
+  const a = Math.round(curAmt() * 100), own = S.p.slots.filter(s => s.look).length;
+  $('#lookName').textContent = (LOOKS[curLook()]?.label || 'Natural') + (a < 100 && curLook() !== 'none' ? ` · ${a}%` : '') +
+    (hasAdj(S.p.adj) ? ' · adjusted' : '') + (own ? ` · ${own} shot${own > 1 ? 's' : ''} own` : '');
+  updUndo();
+}
+function openProject(p) {
+  stop();
+  S.p = JSON.parse(JSON.stringify(p)); S.T = S.templates[S.p.template];
+  if (!S.p.texts) S.p.texts = JSON.parse(JSON.stringify(S.T.texts));
+  { const pc = projectCol(S.p);                   // show the reel's own folder in the library
+    if (LF.col !== 'all' && LF.col !== pc) { LF.col = pc; LF.loc = 'all'; LF.shown = 120; try { localStorage.setItem('rs-col', pc); } catch (e) {} buildLibFilters(); } }
+  if (!LOOKS[S.p.grade]) S.p.grade = LOOKS[S.T.grade] ? S.T.grade : 'natural';
+  if (S.p.grade_amt === undefined) S.p.grade_amt = 1;
+  if (TE) { TE = null; $('#txEdit').hidden = true; }
+  closeLookPop();
+  S.sel = 0; S.selText = null; S.frame = 0; S.hist = []; S.fut = []; active = -1;
+  try { localStorage.setItem('rs-last', S.p.id); } catch (e) {}
+  const T = S.T;
+  blobUrl(T.audio).then(u => { if (S.T === T) audio.src = u; }).catch(() => { audio.src = T.audio; });
+  blobUrl(T.insp).then(u => { if (S.T === T) { orig.src = u; origRef.src = u; } }).catch(() => { orig.src = T.insp; origRef.src = T.insp; });
+  vids.forEach(v => v && v.el.removeAttribute('src')); vids = [];
+  syncVideos(); fitTimeline();
+  renderProjects(); renderHeader(); renderTimeline(); renderInspector(); renderLib(); showFrame(0);
+  $('#saveState').textContent = 'All changes saved';
+}
+async function newProject(base, name) {
+  await save();
+  const p = JSON.parse(JSON.stringify(base)); p.id = ''; p.name = name; S.p = p;
+  await save(); openProject(S.p); toast('New reel created — your other reels are untouched');
+}
+
+// ------------------------------------------------------------------ library
+// ---------- folders: Europe trip, House Party 02, … (each a footage folder on this PC)
+const colOf = c => (c && c.col) || 'europe';
+function buildColSel() {
+  const cols = S.cols || [];
+  if (LF.col !== 'all' && !cols.some(c => c.key === LF.col)) LF.col = 'all';
+  if (LF.col === 'all' && cols.length === 1) LF.col = cols[0].key;       // only one folder: no "All folders" entry
+  $('#colSel').innerHTML = (cols.length > 1 ? `<option value="all">📁 All folders (${S.lib.length.toLocaleString()})</option>` : '') +
+    cols.map(c => `<option value="${esc(c.key)}">📁 ${esc(c.name)} (${S.lib.filter(x => colOf(x) === c.key).length.toLocaleString()})</option>`).join('') +
+    '<option value="__add">＋ Add a folder…</option>';
+  $('#colSel').value = LF.col;
+}
+function buildLibFilters() {
+  buildColSel();
+  const locs = {}; S.lib.forEach(c => { if (LF.col === 'all' || colOf(c) === LF.col) locs[c.l] = (locs[c.l] || 0) + 1; });
+  if (LF.loc !== 'all' && !locs[LF.loc]) LF.loc = 'all';
+  $('#loc').innerHTML = `<option value="all">All ${LF.col === 'all' || LF.col === 'europe' ? 'places' : 'sub-folders'}</option>` + Object.keys(locs).sort().map(l => `<option value="${esc(l)}">${esc(l.replace(/\\/g, ' / '))} (${locs[l]})</option>`).join('');
+  $('#loc').value = LF.loc;
+  if (!$('#tagChips').children.length) $('#tagChips').innerHTML = TAGS.map(t => `<button class="chip" data-tag="${t}" aria-pressed="false">${t}</button>`).join('');
+}
+function setCol(key, quiet) {
+  LF.col = key; LF.loc = 'all'; LF.shown = 120;
+  try { localStorage.setItem('rs-col', key); } catch (e) {}
+  buildLibFilters(); renderLib();
+  if (!quiet) { const c = (S.cols || []).find(x => x.key === key); toast(c ? `Library: ${esc(c.name)}` : 'Library: all folders'); }
+}
+async function refreshLibrary() {
+  const d = await api('/api/library');
+  S.lib = d.library.filter(c => c.n > 0); S.byId = {}; S.lib.forEach(c => S.byId[c.id] = c); S.cols = d.collections;
+}
+async function addFolder() {
+  const path = prompt('Footage folder to add (paste its full path, e.g. C:\\Users\\…\\Desktop\\HP3):');
+  if (!path || !path.trim()) { buildColSel(); return; }
+  const name = prompt('A short name for it (shown in this menu):', path.trim().replace(/[\\/]+$/, '').split(/[\\/]/).pop()) || '';
+  try {
+    const r = await api('/api/collections/add', {path: path.trim(), name});
+    toast('Scanning the folder: reading clips and making thumbnails…', 0);
+    for (;;) {
+      await new Promise(res => setTimeout(res, 1200));
+      const st = await api('/api/collections/status');
+      if (st.state === 'running') { toast(`Scanning ${esc(st.name)}: ${st.done} of ${st.total || '…'} files`, 0); continue; }
+      if (st.state === 'error') { toast('Could not scan the folder: ' + esc(st.msg), 8000); break; }
+      if (st.first) { location.reload(); return; }            // its first reel was just started
+      await refreshLibrary(); setCol(r.key, true);
+      toast(`Added ${esc(st.name || name)}: ${esc(st.msg)}. Preview copies are being made in the background.`, 6000);
+      break;
+    }
+  } catch (e) { toast('Could not add the folder: ' + esc(e.message), 8000); buildColSel(); }
+}
+function showWelcome() {
+  $('#busy').innerHTML = `<div style="max-width:560px;text-align:center;line-height:1.6;color:var(--ink)">
+    <div style="font-size:22px;font-weight:700;margin-bottom:6px">Welcome to Reel Studio</div>
+    <div style="color:var(--muted);margin-bottom:18px">Make Instagram reels from your own clips, cut to the beat.<br>
+      Start with the folder where your videos are (sub-folders are included).</div>
+    <input type="text" id="wPath" placeholder="Paste the folder's full path, e.g. D:\\Trips\\Goa" style="width:100%;margin-bottom:8px">
+    <input type="text" id="wName" placeholder="A short name for it (optional), e.g. Goa trip" style="width:100%;margin-bottom:12px">
+    <button class="primary" id="wGo">＋ Add my footage</button>
+    <div id="wMsg" style="margin-top:14px;color:var(--muted)">Nothing leaves your computer: Reel Studio only reads the folder and keeps its own copies here.</div></div>`;
+  $('#wGo').onclick = async () => {
+    const path = $('#wPath').value.trim(); if (!path) { $('#wPath').focus(); return; }
+    $('#wGo').disabled = true;
+    try {
+      await api('/api/collections/add', {path, name: $('#wName').value.trim()});
+      for (;;) {
+        await new Promise(res => setTimeout(res, 1200));
+        const st = await api('/api/collections/status');
+        if (st.state === 'running') { $('#wMsg').textContent = `Reading your clips and making thumbnails: ${st.done} of ${st.total || '…'} files`; continue; }
+        if (st.state === 'error') throw new Error(st.msg);
+        if (!st.first) throw new Error('No videos long enough for a reel were found in that folder (MP4 or MOV, at least 1.5 seconds).');
+        $('#wMsg').textContent = 'Done. Opening your first reel…'; location.reload(); return;
+      }
+    } catch (e) { $('#wMsg').innerHTML = '<span style="color:#ff8a80">' + esc(e.message) + '</span>'; $('#wGo').disabled = false; }
+  };
+}
+function projectCol(p) {                          // the folder most of a reel's shots come from
+  const v = {}; (p.slots || []).forEach(s => { const k = colOf(S.byId[s.clip]); v[k] = (v[k] || 0) + 1; });
+  return Object.keys(v).sort((a, b) => v[b] - v[a])[0] || 'europe';
+}
+function usedSet() { return new Set(S.p.slots.map(s => s.clip)); }
+function libFiltered() {
+  const dur = S.p ? slotDur(S.sel) : 0, used = usedSet();
+  const words = LF.q.toLowerCase().split(/\s+/).filter(Boolean);
+  return S.lib.filter(c => {
+    if (LF.col !== 'all' && colOf(c) !== LF.col) return false;
+    if (LF.loc !== 'all' && c.l !== LF.loc) return false;
+    if (LF.orient !== 'all' && c.o !== LF.orient) return false;
+    if (LF.kind !== 'all' && (LF.kind === 'photo') !== isPhoto(c)) return false;
+    if (LF.hideBad && c.t.includes('Unusable')) return false;
+    if (LF.fits && !isPhoto(c) && c.d + 0.05 < dur * speedOf(S.p.slots[S.sel])) return false;
+    if (LF.usedOnly && !used.has(c.id)) return false;
+    for (const t of LF.tags) if (!c.t.includes(t)) return false;
+    if (words.length) { const hay = (c.s + ' ' + c.f + ' ' + c.t.join(' ') + ' ' + c.l).toLowerCase(); for (const w of words) if (!hay.includes(w)) return false; }
+    return true;
+  });
+}
+let libList = [];
+function renderLib() {
+  if (!S.p) return;
+  libList = libFiltered();
+  const used = usedSet(), cur = S.p.slots[S.sel]?.clip;
+  const what = LF.kind === 'photo' ? 'photos' : LF.kind === 'video' ? 'clips' : 'clips & photos';
+  $('#libCount').textContent = `${libList.length.toLocaleString()} ${what} · click to preview · ＋ puts it in shot ${S.sel + 1}`;
+  const items = libList.slice(0, LF.shown).map((c, i) => {
+    const mid = Math.floor((c.n - 1) / 2);
+    return `<div class="card ${PV.clip && PV.clip.id === c.id ? 'pv' : ''}" data-i="${i}" draggable="true" title="${esc(c.s)}${c.s ? '\n' : ''}${esc(c.l.replace(/\\/g, ' / '))} · ${esc(c.f)}\nClick to preview · drag onto any shot to replace it · ＋ puts it in shot ${S.sel + 1}">
+      <img loading="lazy" draggable="false" src="${thumbUrl(c, mid)}" alt="">
+      <button class="add" title="Put in shot ${S.sel + 1}">+</button>
+      ${used.has(c.id) ? `<span class="b u">${c.id === cur ? 'This shot' : 'In reel'}</span>` : ''}
+      <span class="b o">${c.o === 'portrait' ? '▯' : '▭'}</span><span class="b d" ${c.raw ? `title="Raw photo${c.full ? ', developed at full size' : ': shown at the camera\'s preview size'}"` : ''}>${isPhoto(c) ? (c.raw ? '📷 raw' : '📷') : fmtS(c.d)}</span>
+      <div class="cap">${esc(c.s || c.f)}</div></div>`;
+  }).join('');
+  $('#libGrid').innerHTML = items + (libList.length > LF.shown ? `<button class="libfoot" id="libMore">Show more (${libList.length - LF.shown} left)</button>`
+    : (libList.length ? '' : `<div class="libfoot">${S.lib.length ? 'No clips match. Try turning off “Long enough”.' : 'No footage yet: choose ＋ Add a folder… in the 📁 menu above.'}</div>`));
+}
+function assignClip(c, inPoint, move) {
+  const s = S.p.slots[S.sel]; if (!s) return;
+  pushHist();
+  const dur = slotDur(S.sel), maxIn = Math.max(0, c.d - dur * speedOf(S.p.slots[S.sel]));
+  s.clip = c.id; s.in = +(inPoint === undefined ? maxIn / 2 : clamp(inPoint, 0, maxIn)).toFixed(2); s.cx = 0.5; s.cy = 0.5; s.zoom = 1;
+  if (isPhoto(c)) { s.in = 0; s.reverse = false; s.move = move || 'none'; } else delete s.move;
+  if ($('#autoNext').checked && S.sel < S.p.slots.length - 1) { S.sel++; S.frame = bounds()[S.sel]; }
+  else if (slotAt(S.frame) !== S.sel) S.frame = bounds()[S.sel];
+  afterChange();
+}
+
+// ------------------------------------------------------------------ inspector
+let stripDrag = null;
+function selectText(id) {
+  S.selText = id;
+  const L = textById(id);
+  if (L && (S.frame < L.f0 || S.frame >= L.f1)) S.frame = L.f0;
+  renderTextTrack(); renderInspector(); showFrame(S.frame);
+}
+function addText() {
+  stop(); pushHist();
+  const base = [...S.p.texts].reverse().find(L => !(S.styles[L.style] || {}).arc) || S.T.texts.find(L => !(S.styles[L.style] || {}).arc);
+  const style = base ? base.style : 'clean';
+  let f0 = S.frame, f1 = Math.min(S.T.total, f0 + 60); if (f1 - f0 < 15) f0 = Math.max(0, f1 - 60);
+  const L = {id: 't' + Date.now().toString(36), text: 'Your text', f0, f1, x: 0.5, y: 0.5, size: base ? base.size : 70, style,
+    xs: S.styles[style].xs, lh: 1.15, anim_in: 'none', in_frames: 12, cps: 30, wstep: 7, anim_out: 'none', out_frames: 6};
+  S.p.texts.push(L); S.selText = L.id; S.frame = f0;
+  afterChange();
+  openTextEditor(L.id, 'canvas', true);
+}
+// ---------- colour swatches (used in the text bubble and in the panel)
+function swatchHtml(L) {
+  const def = (S.styles[L.style] || {}).fill || '#ffffff', cur = (L.color || '').toLowerCase();
+  return `<button class="sw def ${!cur ? 'on' : ''}" data-c="" style="background:${def}" title="The style's own colour">A</button>` +
+    SWATCHES.map(c => `<button class="sw ${cur === c ? 'on' : ''}" data-c="${c}" style="background:${c}" title="${c}"></button>`).join('') +
+    `<input type="color" data-pick value="${cur || def}" title="Any colour">`;
+}
+function wireSwatches(box, L, after) {
+  let picking = false;
+  box.addEventListener('click', e => {
+    const b = e.target.closest('[data-c]'); if (!b) return;
+    pushHist(); if (b.dataset.c) L.color = b.dataset.c; else delete L.color;
+    after(); markDirty();
+  });
+  const pick = box.querySelector('[data-pick]');
+  pick.addEventListener('input', () => { if (!picking) { pushHist(); picking = true; } L.color = pick.value.toLowerCase(); paint(S.frame); markDirty(); });
+  pick.addEventListener('change', () => { picking = false; after(); });
+}
+function deleteText(id) {
+  const i = S.p.texts.findIndex(L => L.id === id); if (i < 0) return;
+  pushHist(); S.p.texts.splice(i, 1); S.selText = null; afterChange(); toast('Text deleted — Ctrl+Z brings it back');
+}
+function resetText() {
+  if (!confirm('Put back the original reel’s text? Your text changes in this reel will be replaced (you can undo).')) return;
+  pushHist(); S.p.texts = JSON.parse(JSON.stringify(S.T.texts)); S.selText = null; afterChange();
+}
+function renderTextInspector() {
+  const L = textById(S.selText), idx = S.p.texts.indexOf(L), st = S.styles[L.style] || {}, dur = (L.f1 - L.f0) / FPS;
+  const speed = L.anim_in === 'type' ? {lbl: 'Typing speed', min: 5, max: 80, step: 1, val: L.cps || 30, unit: ' letters/s'}
+    : L.anim_in === 'words' ? {lbl: 'Time per word', min: 0.07, max: 1, step: 0.01, val: (L.wstep || 7) / FPS, unit: 's'}
+    : L.anim_in === 'fade' ? {lbl: 'Fade-in length', min: 0.1, max: 1.5, step: 0.05, val: (L.in_frames || 12) / FPS, unit: 's'} : null;
+  $('#insp').innerHTML = `
+  <div class="sec">
+    <div class="shot-title">Text <span class="meta">${idx + 1} of ${S.p.texts.length}</span></div>
+    <div class="meta">${fmt(L.f0)} – ${fmt(L.f1)} · on screen for ${dur.toFixed(2)}s</div>
+    <div class="row" style="margin-top:8px"><button id="backShot">← Back to shot ${S.sel + 1}</button></div>
+  </div>
+  <div class="sec">
+    <h3>Words</h3>
+    <textarea id="txT" rows="3" spellcheck="false"></textarea>
+    <p class="hint">Press Enter for a new line. For Urdu or Hindi words pick the “Lyric serif” style.</p>
+  </div>
+  <div class="sec">
+    <h3>Look</h3>
+    <div class="kv">
+      <span class="lbl">Style</span><select id="txStyle">${Object.entries(S.styles).map(([k, v]) => `<option value="${k}" ${k === L.style ? 'selected' : ''}>${esc(v.label)}</option>`).join('')}</select>
+      <span class="lbl">Colour</span><div class="swatches" id="txCol">${swatchHtml(L)}</div>
+      <span class="lbl">Size</span><input type="range" id="txSize" min="16" max="260" step="1">
+      <span class="lbl">Left ↔ right</span><input type="range" id="txX" min="0" max="1" step="0.001">
+      <span class="lbl">Up ↕ down</span><input type="range" id="txY" min="0" max="1" step="0.001">
+      ${st.arc ? '<span class="lbl">Curve</span><input type="range" id="txR" min="200" max="1400" step="10">'
+        : (L.text.includes('\n') ? '<span class="lbl">Line gap</span><input type="range" id="txLh" min="0.6" max="2.5" step="0.01">' : '')}
+    </div>
+    <div class="row" style="margin-top:8px"><button id="txCenter">Centre left-right</button></div>
+    <p class="hint">Tip: drag the text on the preview to move it, double-click it to type.</p>
+  </div>
+  <div class="sec">
+    <h3>Timing</h3>
+    <div class="kv">
+      <span class="lbl">Starts at</span><div class="row"><input type="number" id="txF0" step="0.05" min="0" style="width:78px"><span class="meta">s</span><button id="txF0p" title="Start at the playhead">at playhead</button></div>
+      <span class="lbl">Ends at</span><div class="row"><input type="number" id="txF1" step="0.05" min="0" style="width:78px"><span class="meta">s</span><button id="txF1p" title="End at the playhead">at playhead</button></div>
+      <span class="lbl">Appears</span><select id="txIn"><option value="none">Straight away</option><option value="fade">Fade in</option><option value="type">Typewriter</option><option value="words">Word by word</option></select>
+      ${speed ? `<span class="lbl">${speed.lbl}</span><div class="row" style="flex-wrap:nowrap"><input type="range" id="txSpeed" min="${speed.min}" max="${speed.max}" step="${speed.step}" value="${speed.val}"><span class="meta" id="txSpeedV" style="min-width:70px"></span></div>` : ''}
+      <span class="lbl">Disappears</span><select id="txOut"><option value="none">Straight away</option><option value="fade">Fade out</option></select>
+      ${L.anim_out === 'fade' ? '<span class="lbl">Fade-out length</span><input type="range" id="txOutLen" min="0.05" max="1.5" step="0.05">' : ''}
+    </div>
+    <p class="hint">You can also drag the purple block on the timeline, or its ends.</p>
+  </div>
+  <div class="sec"><h3>Text tools</h3><div class="row"><button id="txDup">Duplicate</button><button id="txDel">Delete text</button></div></div>`;
+  const ta = $('#txT'); ta.value = L.text;
+  $('#txSize').value = L.size; $('#txX').value = L.x; $('#txY').value = L.y;
+  if ($('#txR')) $('#txR').value = L.r || 542;
+  if ($('#txLh')) $('#txLh').value = L.lh || 1.15;
+  $('#txF0').value = (L.f0 / FPS).toFixed(2); $('#txF1').value = (L.f1 / FPS).toFixed(2);
+  $('#txIn').value = L.anim_in || 'none'; $('#txOut').value = L.anim_out || 'none';
+  if ($('#txOutLen')) $('#txOutLen').value = (L.out_frames || 6) / FPS;
+  const showSpeed = () => { const v = $('#txSpeedV'); if (v) v.textContent = (+$('#txSpeed').value).toFixed(speed.step < 1 ? 2 : 0) + speed.unit; };
+  showSpeed();
+  // history: one undo step per edit session of a control
+  let editing = false;
+  const begin = () => { if (!editing) { pushHist(); editing = true; } };
+  const end = () => { editing = false; afterChange(); };
+  const live = () => { renderTextTrack(); paint(S.frame); };
+  ta.addEventListener('input', () => { begin(); L.text = ta.value; live(); markDirty(); });
+  ta.addEventListener('change', end); ta.addEventListener('blur', () => { editing = false; });
+  const slider = (id, fn) => { const el = $('#' + id); if (!el) return; el.addEventListener('input', () => { begin(); fn(+el.value); live(); }); el.addEventListener('change', end); };
+  slider('txSize', v => L.size = Math.round(v));
+  slider('txX', v => L.x = v); slider('txY', v => L.y = v);
+  slider('txR', v => L.r = Math.round(v)); slider('txLh', v => L.lh = v);
+  slider('txOutLen', v => { L.out_frames = Math.max(1, Math.round(v * FPS)); delete L.fade_end; });
+  slider('txSpeed', v => { showSpeed(); if (L.anim_in === 'type') L.cps = v; else if (L.anim_in === 'words') { L.wstep = Math.max(1, Math.round(v * FPS)); delete L.wframes; } else L.in_frames = Math.max(1, Math.round(v * FPS)); });
+  $('#txStyle').addEventListener('change', e => { pushHist(); const ns = e.target.value; L.style = ns; L.xs = S.styles[ns].xs; if (S.styles[ns].arc && !L.r) L.r = 542; afterChange(); });
+  wireSwatches($('#txCol'), L, afterChange);
+  $('#txCenter').onclick = () => { pushHist(); L.x = 0.5; afterChange(); };
+  const setTime = (which, f) => { pushHist(); f = clamp(Math.round(f), 0, S.T.total);
+    if (which === 0) L.f0 = clamp(f, 0, L.f1 - 2); else { L.f1 = clamp(f, L.f0 + 2, S.T.total); delete L.fade_end; } afterChange(); };
+  $('#txF0').addEventListener('change', e => setTime(0, (+e.target.value || 0) * FPS));
+  $('#txF1').addEventListener('change', e => setTime(1, (+e.target.value || 0) * FPS));
+  $('#txF0p').onclick = () => setTime(0, S.frame);
+  $('#txF1p').onclick = () => setTime(1, S.frame + 1);
+  $('#txIn').addEventListener('change', e => { pushHist(); L.anim_in = e.target.value; delete L.wframes; afterChange(); });
+  $('#txOut').addEventListener('change', e => { pushHist(); L.anim_out = e.target.value; delete L.fade_end; afterChange(); });
+  $('#txDup').onclick = () => { pushHist(); const c = JSON.parse(JSON.stringify(L)); c.id = 't' + Date.now().toString(36); c.y = clamp(L.y + 0.06, 0, 1); S.p.texts.push(c); S.selText = c.id; afterChange(); };
+  $('#txDel').onclick = () => deleteText(L.id);
+  $('#backShot').onclick = () => { S.selText = null; renderTextTrack(); selectSlot(S.sel); };
+}
+function renderInspector() {
+  if (!S.p) return;
+  if (S.selText && textById(S.selText)) return renderTextInspector();
+  S.selText = null;
+  const k = S.sel, s = S.p.slots[k], c = S.byId[s.clip], b = bounds(), dur = slotDur(k), need = dur * speedOf(s);
+  if (isPhoto(c)) return renderPhotoInspector(k, s, c, b, dur);
+  const ready = proxyState[c.id] === 'ready';
+  const strip = ready ? `<div class="strip" id="strip" style="background-image:url('/api/strip?id=${c.id}')">`
+    : `<div class="strip" id="strip">${Array.from({length: Math.max(1, c.n)}, (_, i) => `<img src="${thumbUrl(c, i)}" alt="">`).join('')}`;
+  $('#insp').innerHTML = `
+  <div class="sec">
+    <div class="shot-title">Shot ${k + 1} <span class="meta">of ${S.p.slots.length}</span></div>
+    <div class="meta">${fmt(b[k])} – ${fmt(b[k + 1])} · ${dur.toFixed(2)}s long</div>
+    <div style="margin-top:10px"><span class="lbl" style="display:block;margin-bottom:5px">Speed <span class="meta">(slow motion ← → faster)</span></span>
+      <div class="seg" id="speedSeg" style="flex-wrap:wrap">${SPEEDS.map(v => `<button data-v="${v}" aria-pressed="${speedOf(s) === v}" title="${v < 1 ? 'Slow motion' : v > 1 ? 'Faster' : 'Normal speed'}">${v}×</button>`).join('')}</div>
+      <p class="hint" style="margin-top:5px">${speedOf(s) === 1 ? 'Normal speed' : speedOf(s) < 1 ? 'Slow motion' : 'Sped up'}: this ${dur.toFixed(2)}s shot plays <b>${need.toFixed(2)}s</b> of the clip and stays the same length on the beat.${speedOf(s) < 1 && (c.fps || 30) < 50 ? ' Filmed at ' + Math.round(c.fps || 30) + ' fps, so very slow speeds look steppy.' : ''}</p></div>
+    <div class="cmp"><canvas id="refCv" width="144" height="256"></canvas>
+      <div class="meta">The original reel at this moment. Pick a clip from the library on the left to fill this shot.</div></div>
+  </div>
+  <div class="sec">
+    <h3>Clip in this shot</h3>
+    <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div style="font-weight:600">${esc(c.s || c.f)}</div>
+      <button id="pvThis" title="Watch the whole clip in the preview panel">▶ Preview</button></div>
+    <div class="meta">${esc(c.l.replace(/\\/g, ' / '))} · ${esc(c.g)} · ${c.d.toFixed(1)}s · ${c.o}</div>
+    <div class="meta">${esc(c.t.join(' · '))}</div>
+    <div class="meta" style="word-break:break-all;margin-top:3px">${esc(c.f)}</div>
+  </div>
+  <div class="sec">
+    <h3>Which part plays</h3>
+    ${strip}<div class="win" id="win"></div></div>
+    <div class="row" style="margin-top:8px"><span class="meta">Starts at</span>
+      <input type="number" id="inNum" step="0.1" min="0" style="width:84px"><span class="meta">s of ${c.d.toFixed(1)}s</span></div>
+    ${c.d + 0.05 < need ? '<div class="warn">This clip is shorter than the shot needs, so its last frame will freeze.</div>' : ''}
+    <p class="hint">Drag the bright box along the clip to choose the moment, or click the shot on the timeline to choose it while watching.</p>
+  </div>
+  <div class="sec">${framingHtml(s, `<label class="lbl" style="display:inline-flex;gap:5px;align-items:center"><input type="checkbox" id="revC" ${s.reverse ? 'checked' : ''}> Play backwards</label>`)}</div>
+  <div class="sec">
+    <h3>Shot tools</h3>
+    <div class="row"><button id="splitB">✂ Split at playhead</button><button id="mergeB" ${k >= S.p.slots.length - 1 ? 'disabled' : ''}>⇥ Merge with next</button></div>
+    <p class="hint">Drag the white bars between shots on the timeline to change when cuts happen. The song and text stay where they are.</p>
+  </div>`;
+  updateStrip(); syncSliders(); drawRef(); updPvBar();
+  // wire
+  $('#pvThis').addEventListener('click', () => openShotPreview(k));
+  $('#inNum').addEventListener('change', e => { pushHist(); s.in = clamp(+e.target.value || 0, 0, Math.max(0, c.d - need)); afterChange(); });
+  $('#speedSeg').addEventListener('click', e => {
+    const bt = e.target.closest('button'); if (!bt) return; pushHist();
+    const v = +bt.dataset.v; if (v === 1) delete s.speed; else s.speed = v;
+    s.in = +clamp(s.in || 0, 0, Math.max(0, c.d - dur * v)).toFixed(2); afterChange();
+  });
+  const stripEl = $('#strip');
+  stripEl.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    const r = stripEl.getBoundingClientRect(), winW = Math.min(1, need / c.d) * r.width;
+    const onWin = e.target.id === 'win';
+    pushHist();
+    const maxIn = Math.max(0, c.d - need);
+    if (!onWin) { s.in = +clamp((e.clientX - r.left - winW / 2) / r.width * c.d, 0, maxIn).toFixed(2); }
+    stripDrag = {x0:e.clientX, in0:s.in, w:r.width, maxIn};
+    if (slotAt(S.frame) !== k) S.frame = b[k];
+    updateStrip(); showFrame(S.frame);
+    const move = ev => { s.in = +clamp(stripDrag.in0 + (ev.clientX - stripDrag.x0) / stripDrag.w * c.d, 0, stripDrag.maxIn).toFixed(2); updateStrip(); showFrame(S.frame); };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); stripDrag = null; afterChange(); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+  });
+  wireFraming(s);
+  let sliderHist = false;
+  for (const [id, key] of [['zoomR', 'zoom'], ['cxR', 'cx'], ['cyR', 'cy']]) {
+    const el = $('#' + id);
+    el.addEventListener('input', () => { if (!sliderHist) { pushHist(); sliderHist = true; } s[key] = +el.value; normalizeCrop(s, c); syncSliders(); paint(S.frame); });
+    el.addEventListener('change', () => { sliderHist = false; afterChange(); });
+  }
+  $('#resetFrame').addEventListener('click', () => { pushHist(); s.cx = 0.5; s.cy = 0.5; s.zoom = 1; afterChange(); });
+  $('#revC').addEventListener('change', e => { pushHist(); s.reverse = e.target.checked; afterChange(); });
+  $('#splitB').addEventListener('click', split);
+  $('#mergeB').addEventListener('click', mergeNext);
+}
+// the Framing section of a shot: how it fills the frame, rotation, and the crop sliders (crop only)
+function framingHtml(s, extra) {
+  const m = fitMode(s), off = m !== 'crop' ? 'disabled' : '', r = rotOf(s);
+  return `<h3>Framing</h3>
+    <div class="seg" id="fitSeg">${FILLS.map(([v, t]) => `<button data-v="${v}" aria-pressed="${m === v}">${t.replace('Whole clip · ', 'Whole · ')}</button>`).join('')}</div>
+    <div class="row" style="margin-top:9px"><span class="lbl">Rotate</span><button id="rotL" title="Turn the clip 90° to the left">⟲ 90°</button><button id="rotR" title="Turn the clip 90° to the right">⟳ 90°</button>
+      <span class="meta">${r ? r + '° turned' : 'not turned'}</span></div>
+    <div class="kv" style="margin-top:10px">
+      <span class="lbl">Zoom</span><input type="range" id="zoomR" min="1" max="3" step="0.01" ${off}>
+      <span class="lbl">Left ↔ right</span><input type="range" id="cxR" min="0" max="1" step="0.001" ${off}>
+      <span class="lbl">Up ↕ down</span><input type="range" id="cyR" min="0" max="1" step="0.001" ${off}>
+    </div>
+    <div class="row" style="margin-top:9px"><button id="resetFrame">Reset framing</button>${extra}</div>
+    <p class="hint">${m === 'crop' ? 'Tip: drag on the preview to move the crop, scroll on it to zoom.' : 'The whole clip shows. Choose “Crop to fill” to move or zoom it.'} The reel’s shape is the Format menu at the top.</p>`;
+}
+function wireFraming(s) {
+  $('#fitSeg').addEventListener('click', e => { const bt = e.target.closest('button'); if (!bt) return; pushHist(); s.fit = bt.dataset.v; afterChange(); });
+  const turn = d => { pushHist(); const r = (rotOf(s) + d + 360) % 360; if (r) s.rot = r; else delete s.rot; s.cx = 0.5; s.cy = 0.5; s.zoom = 1; afterChange(); };
+  $('#rotL').addEventListener('click', () => turn(-90));
+  $('#rotR').addEventListener('click', () => turn(90));
+}
+function renderPhotoInspector(k, s, c, b, dur) {
+  $('#insp').innerHTML = `
+  <div class="sec">
+    <div class="shot-title">Shot ${k + 1} <span class="meta">of ${S.p.slots.length}</span></div>
+    <div class="meta">${fmt(b[k])} – ${fmt(b[k + 1])} · ${dur.toFixed(2)}s long</div>
+    <div class="cmp"><canvas id="refCv" width="144" height="256"></canvas>
+      <div class="meta">The original reel at this moment.</div></div>
+  </div>
+  <div class="sec">
+    <h3>Photo in this shot</h3>
+    <div style="font-weight:600;word-break:break-all">${esc(c.f)}</div>
+    <div class="meta">${esc(c.l.replace(/\\/g, ' / '))} · photo · ${c.o} · ${c.w}×${c.h}${c.raw ? (c.full ? ' · raw' : ' · raw (preview size)') : ''}</div>
+  </div>
+  <div class="sec">
+    <h3>Movement</h3>
+    <div class="seg" id="moveSeg">${[['none', 'Still'], ['in', 'Slow zoom in'], ['out', 'Slow zoom out']].map(([v, t]) => `<button data-v="${v}" aria-pressed="${(s.move || 'none') === v}">${t}</button>`).join('')}</div>
+  </div>
+  <div class="sec">${framingHtml(s, '')}</div>
+  <div class="sec">
+    <h3>Shot tools</h3>
+    <div class="row"><button id="splitB">✂ Split at playhead</button><button id="mergeB" ${k >= S.p.slots.length - 1 ? 'disabled' : ''}>⇥ Merge with next</button></div>
+  </div>`;
+  syncSliders(); drawRef(); updPvBar();
+  $('#moveSeg').addEventListener('click', e => { const bt = e.target.closest('button'); if (!bt) return; pushHist(); s.move = bt.dataset.v; afterChange(); });
+  wireFraming(s);
+  let sliderHist = false;
+  for (const [id, key] of [['zoomR', 'zoom'], ['cxR', 'cx'], ['cyR', 'cy']]) {
+    const el = $('#' + id);
+    el.addEventListener('input', () => { if (!sliderHist) { pushHist(); sliderHist = true; } s[key] = +el.value; normalizeCrop(s, c); syncSliders(); paint(S.frame); });
+    el.addEventListener('change', () => { sliderHist = false; afterChange(); });
+  }
+  $('#resetFrame').addEventListener('click', () => { pushHist(); s.cx = 0.5; s.cy = 0.5; s.zoom = 1; afterChange(); });
+  $('#splitB').addEventListener('click', split);
+  $('#mergeB').addEventListener('click', mergeNext);
+}
+function updateStrip() {
+  const k = S.sel, s = S.p.slots[k], c = S.byId[s.clip], dur = slotDur(k), win = $('#win'); if (!win) return;
+  const st = inStart(s, c, dur), wf = Math.min(1, dur * speedOf(s) / c.d);
+  win.style.left = (st / c.d * 100) + '%'; win.style.width = (wf * 100) + '%';
+  const n = $('#inNum'); if (n && document.activeElement !== n) n.value = st.toFixed(2);
+}
+function syncSliders() {
+  const s = S.p.slots[S.sel], z = $('#zoomR'); if (!z) return;
+  z.value = s.zoom || 1; $('#cxR').value = s.cx ?? 0.5; $('#cyR').value = s.cy ?? 0.5;
+}
+let refToken = 0;
+function drawRef() {
+  const rc = $('#refCv'); if (!rc) return;
+  const b = bounds(), t = (b[S.sel] + b[S.sel + 1]) / 2 / FPS, tok = ++refToken;
+  const draw = () => {
+    if (tok !== refToken) return;
+    const g = rc.getContext('2d'), vw = origRef.videoWidth, vh = origRef.videoHeight;
+    g.fillStyle = '#000'; g.fillRect(0, 0, rc.width, rc.height);
+    if (vw) { const sc = Math.max(rc.width / vw, rc.height / vh); g.drawImage(origRef, (rc.width - vw * sc) / 2, (rc.height - vh * sc) / 2, vw * sc, vh * sc); }
+  };
+  const go = () => {
+    if (Math.abs(origRef.currentTime - t) < 0.01 && origRef.readyState >= 2 && !origRef.seeking) { draw(); return; }
+    origRef.onseeked = () => { origRef.onseeked = null; draw(); }; origRef.currentTime = t;
+  };
+  if (origRef.readyState >= 1) go(); else origRef.addEventListener('loadedmetadata', go, {once:true});
+}
+
+// ------------------------------------------------------------------ timeline
+function fitTimeline() {
+  const w = $('#tlScroll').clientWidth - 40;
+  S.ppf = clamp(w / S.T.total, 1, 14); $('#zoom').value = S.ppf;
+}
+function renderTimeline() {
+  if (!S.p) return;
+  const T = S.T, ppf = S.ppf, b = bounds(), Wd = Math.ceil(T.total * ppf);
+  $('#tl').style.width = Wd + 'px';
+  drawRuler(Wd); drawWave(Wd);
+  $('#vtrack').style.width = Wd + 'px';
+  $('#vtrack').innerHTML = S.p.slots.map((s, k) => {
+    const c = S.byId[s.clip], st = proxyState[s.clip];
+    const label = st === 'error' ? 'no preview' : (st && st !== 'ready' ? 'preparing…' : '');
+    return `<div class="slot ${k === S.sel ? 'sel' : ''}" data-k="${k}" draggable="true" title="Shot ${k + 1} — drag onto another shot to swap them" style="left:${b[k] * ppf}px;width:${(b[k + 1] - b[k]) * ppf}px;background-image:url('${thumbAt(c, inStart(s, c, slotDur(k)) + slotDur(k) * speedOf(s) / 2)}')">
+      <span class="n">${k + 1}${speedOf(s) !== 1 ? ` · ${speedOf(s)}×` : ''}${rotOf(s) ? ' · ⟳' : ''}</span>${s.look ? `<span class="lk1" title="This shot has its own colour: ${esc(LOOKS[s.look.grade]?.label || '')}">🎨</span>` : ''}${label ? `<span class="ld">${label}</span>` : ''}</div>`;
+  }).join('');
+  $('#handles').innerHTML = S.p.cuts.map((f, j) => `<div class="handle" data-j="${j}" style="left:${f * ppf}px" title="Drag to move this cut"></div>`).join('');
+  renderTextTrack();
+  updatePlayhead();
+}
+function textLanes() {
+  const items = S.p.texts.map((L, i) => ({L, i})).sort((a, b) => a.L.f0 - b.L.f0 || a.i - b.i), ends = [], lane = {};
+  for (const it of items) { let k = ends.findIndex(e => e <= it.L.f0); if (k < 0) { k = ends.length; ends.push(0); } ends[k] = it.L.f1; lane[it.L.id] = k; }
+  return {lane, n: Math.max(1, ends.length)};
+}
+function renderTextTrack() {
+  const ppf = S.ppf, Wd = Math.ceil(S.T.total * ppf), {lane, n} = textLanes();
+  const tt = $('#ttrack'); tt.style.width = Wd + 'px'; tt.style.height = n * 27 + 'px';
+  tt.innerHTML = S.p.texts.map(L => {
+    const label = (L.text || '(empty)').replace(/\n/g, ' / '), w = Math.max(20, (L.f1 - L.f0) * ppf);
+    return `<div class="tx ${L.id === S.selText ? 'sel' : ''} ${w < 90 ? 'narrow' : ''}" data-id="${esc(L.id)}" title="${esc(label)}\nDouble-click to change the words · drag to move · drag an end to show it longer or shorter"
+      style="left:${L.f0 * ppf}px;width:${w}px;top:${lane[L.id] * 27}px"><span class="eL"></span><span class="tl">${esc(label)}</span><span class="dur">${((L.f1 - L.f0) / FPS).toFixed(1)}s</span><span class="eR"></span></div>`;
+  }).join('');
+  const waveTop = 126 + n * 27 + 6;
+  $('#wave').style.top = waveTop + 'px';
+  $('#tl').style.height = (waveTop + 52) + 'px';
+}
+function positionTimeline() {
+  const b = bounds(), ppf = S.ppf;
+  document.querySelectorAll('#vtrack .slot').forEach((el, k) => { el.style.left = b[k] * ppf + 'px'; el.style.width = (b[k + 1] - b[k]) * ppf + 'px'; });
+  document.querySelectorAll('#handles .handle').forEach((el, j) => { el.style.left = S.p.cuts[j] * ppf + 'px'; });
+}
+function hiDPI(cnv, w, h) { const r = window.devicePixelRatio || 1; cnv.width = Math.round(w * r); cnv.height = Math.round(h * r); cnv.style.width = w + 'px'; cnv.style.height = h + 'px'; const g = cnv.getContext('2d'); g.setTransform(r, 0, 0, r, 0, 0); return g; }
+function drawRuler(Wd) {
+  const g = hiDPI($('#ruler'), Wd, 24);
+  g.fillStyle = '#9494a0'; g.font = '10px Segoe UI';
+  const step = S.ppf < 2.5 ? 30 : 15;
+  for (let f = 0; f <= S.T.total; f += step) { const x = f * S.ppf, major = f % 30 === 0; g.fillRect(x, major ? 13 : 18, 1, major ? 11 : 6); if (major) g.fillText((f / 30) + 's', x + 3, 11); }
+  g.fillStyle = '#8b7bff';
+  S.T.cuts.forEach(f => { const x = f * S.ppf; g.beginPath(); g.moveTo(x - 4, 24); g.lineTo(x + 4, 24); g.lineTo(x, 17); g.fill(); });
+}
+function drawWave(Wd) {
+  const g = hiDPI($('#wave'), Wd, 46), wv = S.T.wave;
+  g.fillStyle = '#1f5d58';
+  for (let i = 0; i < wv.length; i++) { const h = Math.max(1, wv[i] * 42); g.fillRect(i * S.ppf, 23 - h / 2, Math.max(1, S.ppf - 0.4), h); }
+}
+function updatePlayhead() {
+  if (!S.p) return;
+  const x = S.frame * S.ppf;
+  $('#playhead').style.left = x + 'px';
+  $('#time').textContent = fmt(S.frame) + ' / ' + fmt(S.T.total);
+  updFsBar();
+  if (S.playing) { const sc = $('#tlScroll'), vx = x + 18 - sc.scrollLeft; if (vx > sc.clientWidth - 40 || vx < 0) sc.scrollLeft = x - 40; }
+}
+function frameFromX(clientX) { const r = $('#tl').getBoundingClientRect(); return clamp(Math.round((clientX - r.left) / S.ppf), 0, S.T.total - 1); }
+function selectSlot(k, keepFrame) {
+  S.sel = clamp(k, 0, S.p.slots.length - 1);
+  if (S.selText) { S.selText = null; renderTextTrack(); }
+  if (!keepFrame && slotAt(S.frame) !== S.sel) S.frame = bounds()[S.sel];
+  document.querySelectorAll('#vtrack .slot').forEach((el, i) => el.classList.toggle('sel', i === S.sel));
+  renderInspector(); renderLib(); showFrame(S.frame);
+  if (!$('#lookPop').hidden) { renderLookGrid(); syncLookPop(); }
+}
+function snapFrame(f, ev, skip) {
+  if (!$('#snap').checked || ev.altKey) return f;
+  let best = null;
+  for (const c of [0, S.T.total, S.frame, ...S.p.cuts, ...S.T.cuts]) {
+    if (c === skip) continue;
+    if (Math.abs(c - f) <= 3 && (best === null || Math.abs(c - f) < Math.abs(best - f))) best = c;
+  }
+  return best ?? f;
+}
+const lastTx = {id: null, t: 0};
+$('#tl').addEventListener('pointerdown', e => {
+  if (!S.p || e.button !== 0) return;
+  const tx = e.target.closest('.tx');
+  if (tx) {                                   // a text block: select it, drag to move, drag its ends to re-time, double-click to type
+    e.preventDefault(); stop();
+    const L = textById(tx.dataset.id); if (!L) return;
+    const mode = e.target.classList.contains('eL') ? 'L' : e.target.classList.contains('eR') ? 'R' : 'M';
+    const now = Date.now();
+    if (mode === 'M' && lastTx.id === L.id && now - lastTx.t < 450) { lastTx.id = null; openTextEditor(L.id, 'block', true); return; }
+    lastTx.id = L.id; lastTx.t = now;
+    if (S.selText !== L.id) selectText(L.id);
+    const f0 = L.f0, f1 = L.f1, fe = L.fade_end, x0 = frameFromX(e.clientX), total = S.T.total;
+    let moved = false;
+    const move = ev => {
+      const d = frameFromX(ev.clientX) - x0;
+      if (!moved && d === 0) return;
+      if (!moved) { pushHist(); moved = true; }
+      if (mode === 'M') {
+        const len = f1 - f0; let n0 = clamp(f0 + d, 0, total - len);
+        const s0 = snapFrame(n0, ev), s1 = snapFrame(n0 + len, ev);
+        if (s0 !== n0) n0 = s0; else if (s1 !== n0 + len) n0 = s1 - len;
+        n0 = clamp(n0, 0, total - len);
+        L.f0 = n0; L.f1 = n0 + len; if (fe !== undefined) L.fade_end = fe + (n0 - f0);
+      } else if (mode === 'L') { L.f0 = clamp(snapFrame(f0 + d, ev), 0, L.f1 - 2); }
+      else { L.f1 = clamp(snapFrame(f1 + d, ev), L.f0 + 2, total); delete L.fade_end; }
+      renderTextTrack(); showFrame(mode === 'R' ? L.f1 - 1 : L.f0);
+      toast(`“${esc(L.text.split('\n')[0].slice(0, 30))}” shows ${fmt(L.f0)} – ${fmt(L.f1)} (${((L.f1 - L.f0) / FPS).toFixed(2)}s)`, 1200);
+    };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); if (moved) afterChange(); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+    return;
+  }
+  const h = e.target.closest('.handle');
+  if (h) {
+    e.preventDefault(); stop();
+    const j = +h.dataset.j; pushHist(); h.classList.add('drag');
+    const move = ev => {
+      const b = bounds(), lo = b[j] + 2, hi = b[j + 2] - 2;
+      let f = clamp(frameFromX(ev.clientX), lo, hi);
+      if ($('#snap').checked && !ev.altKey) { let best = null; S.T.cuts.forEach(cf => { if (cf >= lo && cf <= hi && Math.abs(cf - f) <= 4 && (best === null || Math.abs(cf - f) < Math.abs(best - f))) best = cf; }); if (best !== null) f = best; }
+      S.p.cuts[j] = f; positionTimeline(); showFrame(f);
+    };
+    const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); afterChange(); };
+    window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+    return;
+  }
+  stop();
+  const sl = e.target.closest('.slot');
+  const f = frameFromX(e.clientX);
+  if (sl) { S.frame = f; S.selText = null; renderTextTrack(); selectSlot(+sl.dataset.k, true); openShotPreview(+sl.dataset.k); return; }
+  showFrame(f);
+  const move = ev => showFrame(frameFromX(ev.clientX));
+  const up = () => { window.removeEventListener('pointermove', move); window.removeEventListener('pointerup', up); };
+  window.addEventListener('pointermove', move); window.addEventListener('pointerup', up);
+});
+function split() {
+  const f = S.frame, k = slotAt(f), b = bounds();
+  if (f - b[k] < 2 || b[k + 1] - f < 2) { toast('Move the playhead into the middle of a shot to split it'); return; }
+  pushHist();
+  const s = S.p.slots[k], sp = speedOf(s), a = (f - b[k]) / FPS * sp, d0 = (b[k + 1] - b[k]) / FPS, d = d0 * sp, c = S.byId[s.clip];
+  const st = inStart(s, c, d0);
+  const A = JSON.parse(JSON.stringify({...s, in: st})), B = JSON.parse(JSON.stringify({...s, in: st}));
+  if (!s.reverse) B.in = +(st + a).toFixed(3); else A.in = +(st + d - a).toFixed(3);
+  S.p.slots.splice(k, 1, A, B); S.p.cuts.splice(k, 0, f); S.sel = k + 1;
+  afterChange();
+}
+function mergeNext() {
+  const k = S.sel; if (k >= S.p.slots.length - 1) { toast('This is the last shot'); return; }
+  pushHist(); S.p.cuts.splice(k, 1); S.p.slots.splice(k + 1, 1); afterChange();
+}
+function resetBeats() {
+  const oc = S.T.cuts, n = oc.length + 1;
+  if (S.p.slots.length !== n && !confirm(`The original has ${n} shots and you have ${S.p.slots.length}. Reset to ${n} shots on the original beats?`)) return;
+  pushHist();
+  if (S.p.slots.length > n) S.p.slots.length = n;
+  while (S.p.slots.length < n) S.p.slots.push(JSON.parse(JSON.stringify(S.p.slots[S.p.slots.length - 1])));
+  S.p.cuts = oc.slice(); S.sel = Math.min(S.sel, n - 1); afterChange();
+}
+
+// ------------------------------------------------------------------ preview canvas: drag to pan, wheel to zoom
+function textAtPoint(px, py) {
+  for (let i = S.p.texts.length - 1; i >= 0; i--) {
+    const L = S.p.texts[i]; if (S.frame < L.f0 || S.frame >= L.f1 || !L.text.trim()) continue;
+    const R = getRes(L), rc = R && layerRect(L, R);
+    if (rc && px >= rc.x - 14 && px <= rc.x + rc.w + 14 && py >= rc.y - 12 && py <= rc.y + rc.h + 12) return L;
+  }
+  return null;
+}
+cv.addEventListener('dblclick', e => {
+  if (!S.p || isFs()) return;
+  const cr = cv.getBoundingClientRect(), hit = textAtPoint((e.clientX - cr.left) / cr.width * VW, (e.clientY - cr.top) / cr.height * VH);
+  if (hit) { e.preventDefault(); openTextEditor(hit.id, 'canvas', true); }
+});
+cv.addEventListener('pointerdown', e => {
+  if (!S.p || e.button !== 0) return;
+  if (isFs()) { toggle(); return; }            // full screen: a click plays / pauses
+  stop();
+  const cr = cv.getBoundingClientRect(), px = (e.clientX - cr.left) / cr.width * VW, py = (e.clientY - cr.top) / cr.height * VH;
+  const hit = textAtPoint(px, py);
+  if (hit) {                                   // drag text around the screen
+    if (S.selText !== hit.id) selectText(hit.id);
+    try { cv.setPointerCapture(e.pointerId); } catch (err) {}
+    cv.style.cursor = 'move';
+    const st = {x: e.clientX, y: e.clientY, lx: hit.x, ly: hit.y}; let moved = false;
+    const move = ev => {
+      const dx = (ev.clientX - st.x) / cr.width, dy = (ev.clientY - st.y) / cr.height;
+      if (!moved && Math.abs(ev.clientX - st.x) + Math.abs(ev.clientY - st.y) < 3) return;
+      if (!moved) { pushHist(); moved = true; }
+      hit.x = +clamp(st.lx + dx, -0.2, 1.2).toFixed(4); hit.y = +clamp(st.ly + dy, -0.1, 1.1).toFixed(4);
+      if (Math.abs(hit.x - 0.5) < 0.008) hit.x = 0.5;            // gentle snap to the centre line
+      paint(S.frame); const xs = $('#txX'), ys = $('#txY'); if (xs) { xs.value = hit.x; ys.value = hit.y; }
+    };
+    const up = () => { cv.removeEventListener('pointermove', move); cv.removeEventListener('pointerup', up); cv.style.cursor = ''; if (moved) afterChange(); };
+    cv.addEventListener('pointermove', move); cv.addEventListener('pointerup', up);
+    return;
+  }
+  if (S.selText) { S.selText = null; renderTextTrack(); renderInspector(); }
+  const k = slotAt(S.frame); if (k !== S.sel) selectSlot(k, true);
+  const s = S.p.slots[k], c = S.byId[s.clip]; if (fitMode(s) !== 'crop') return;
+  pushHist(); try { cv.setPointerCapture(e.pointerId); } catch (err) {} cv.style.cursor = 'grabbing';
+  const [rw, rh] = rdims(c.w, c.h, s);
+  const r0 = cropRect(rw, rh, s), per = r0.w / cv.clientWidth, st = {x:e.clientX, y:e.clientY, cx:s.cx ?? 0.5, cy:s.cy ?? 0.5};
+  const cxMin = r0.w / 2 / rw, cyMin = r0.h / 2 / rh;
+  const move = ev => {
+    s.cx = clamp(st.cx - (ev.clientX - st.x) * per / rw, cxMin, 1 - cxMin);
+    s.cy = clamp(st.cy - (ev.clientY - st.y) * per / rh, cyMin, 1 - cyMin);
+    normalizeCrop(s, c); syncSliders(); paint(S.frame);
+  };
+  const up = () => { cv.removeEventListener('pointermove', move); cv.removeEventListener('pointerup', up); cv.style.cursor = ''; afterChange(); };
+  cv.addEventListener('pointermove', move); cv.addEventListener('pointerup', up);
+});
+let wheelT = 0;
+cv.addEventListener('wheel', e => {
+  if (!S.p || isFs()) return; e.preventDefault();
+  const k = slotAt(S.frame); if (k !== S.sel) selectSlot(k, true);
+  const s = S.p.slots[k], c = S.byId[s.clip]; if (fitMode(s) !== 'crop') return;
+  if (!wheelT) pushHist();
+  s.zoom = +clamp((s.zoom || 1) * Math.exp(-e.deltaY * 0.0015), 1, 3).toFixed(3); normalizeCrop(s, c); syncSliders(); paint(S.frame);
+  clearTimeout(wheelT); wheelT = setTimeout(() => { wheelT = 0; afterChange(); }, 400);
+}, {passive:false});
+
+// ------------------------------------------------------------------ clip preview (side panel)
+// The teal box on the clip's bar is exactly as long as the selected shot: slide it to choose which part plays.
+const pv = $('#pv'), PV = {clip:null, raf:0, muted:true, token:0, win:0, loop:false};
+const HEVC_OK = !!(pv.canPlayType('video/mp4; codecs="hvc1.1.6.L153.90"') || pv.canPlayType('video/mp4; codecs="hev1.1.6.L153.90"'));
+const fmtT = t => Math.floor(t / 60) + ':' + (t % 60).toFixed(1).padStart(4, '0');
+function pvMsg(text) { const m = $('#pvMsg'); m.hidden = !text; m.firstElementChild.textContent = text || ''; }
+function setSideTab(t) {
+  const clip = t === 'clip';
+  $('#clipWrap').hidden = !clip; $('#origWrap').hidden = clip;
+  $('#tabOrig').setAttribute('aria-pressed', !clip); $('#tabClip').setAttribute('aria-pressed', clip);
+  S.showOrig = !clip;
+  if (clip) { orig.pause(); requestAnimationFrame(layoutGuide); } else { pv.pause(); showFrame(S.frame); }
+}
+function winDur() { return PV.clip && S.p ? Math.min(slotDur(S.sel) * speedOf(S.p.slots[S.sel]), PV.clip.d || 0) : 0; }   // seconds of clip the shot uses
+function isOwnClip() { const s = S.p && S.p.slots[S.sel]; return !!(PV.clip && s && s.clip === PV.clip.id); }
+function setWin(t) { PV.win = +clamp(t, 0, Math.max(0, (PV.clip.d || 0) - slotDur(S.sel))).toFixed(2); }
+function setLoopBtn() { $('#pvLoop').setAttribute('aria-pressed', PV.loop); }
+function openShotPreview(k) {               // a shot's own clip, with the part it plays looping
+  const s = S.p.slots[k], c = S.byId[s.clip];
+  previewClip(c, isPhoto(c) ? 0 : inStart(s, c, slotDur(k)), {loop: true});
+}
+async function previewClip(c, winStart, opts = {}) {
+  stop();
+  $('#tabClip').hidden = false; setSideTab('clip');
+  const s = S.p.slots[S.sel], dur = slotDur(S.sel), same = PV.clip && PV.clip.id === c.id, photo = isPhoto(c);
+  PV.clip = c;
+  setWin(winStart ?? (s.clip === c.id ? inStart(s, c, dur) : (c.d - dur * speedOf(s)) / 2));
+  PV.loop = !!opts.loop; setLoopBtn();
+  const startAt = PV.loop ? PV.win : (opts.startAt ?? 0);
+  document.querySelectorAll('#libGrid .card').forEach(el => el.classList.toggle('pv', libList[+el.dataset.i]?.id === c.id));
+  $('#pvTitle').textContent = c.s || c.f;
+  $('#pvMeta').textContent = photo ? `${c.l.replace(/\\/g, ' / ')} · photo · ${c.o}${c.raw ? ' · raw' : ''} · ${c.f}`
+    : `${c.l.replace(/\\/g, ' / ')} · ${c.g} · ${fmtS(c.d)} · ${c.f}`;
+  pv.hidden = photo; $('#pvImg').hidden = !photo; $('#pvBar').hidden = photo; $('#pvLoop').hidden = photo; $('#pvMove').hidden = !photo;
+  if (photo) {
+    ++PV.token; pv.pause(); pv.removeAttribute('src'); pv.load(); pvMsg('');
+    $('#pvImg').src = `/pprev/${c.id}.jpg`;
+    $('#pvMove').value = s.clip === c.id ? (s.move || 'none') : 'none';
+    updPvBar(); layoutGuide(); return;
+  }
+  $('#pvImg').removeAttribute('src');
+  if (same && pv.currentSrc) { pv.currentTime = startAt; pv.play().catch(() => {}); updPvBar(); return; }
+  const tok = ++PV.token;
+  $('#pvThumbs').innerHTML = Array.from({length: Math.max(1, c.n)}, (_, i) => `<img src="${thumbUrl(c, i)}" alt="">`).join('');
+  pv.pause(); pv.removeAttribute('src'); pv.load();
+  pv.poster = thumbUrl(c, Math.floor((c.n - 1) / 2));
+  pvMsg(''); updPvBar(); layoutGuide();
+  let st = {status:'none'};
+  try { st = await api(`/api/proxy?id=${c.id}&peek=1`); } catch (e) {}
+  if (tok !== PV.token) return;
+  // play the small preview copy if it exists, otherwise try the original camera file directly
+  if (st.status === 'ready') {
+    let bu = null; try { bu = await blobUrl(st.url); } catch (e) {}
+    if (tok !== PV.token) return;
+    if (bu) { loadPv(c, bu, 'copy', startAt, tok); return; }
+  }
+  if (!HEVC_OK) { loadPv(c, '', 'orig-skip', startAt, tok); return; }   // browser can't play camera files at all
+  loadPv(c, `/src/${c.id}`, 'orig', startAt, tok);
+}
+function loadPv(c, url, mode, startAt, tok) {
+  let settled = false;
+  const useCopy = () => {
+    // the browser can't play this camera file (e.g. 10-bit portrait 4K) - play a small preview copy instead
+    pv.onerror = pv.onloadedmetadata = pv.onloadeddata = null;
+    pv.removeAttribute('src'); pv.load();             // drop the big file's download straight away
+    const t0 = Date.now();
+    const tick = () => { if (tok !== PV.token || settled2) return; pvMsg(`Making a quick preview copy of this clip… ${Math.round((Date.now() - t0) / 1000)}s`); setTimeout(tick, 1000); };
+    let settled2 = false; tick();
+    ensureProxy(c.id).then(u => u && blobUrl(u)).then(bu => {
+      settled2 = true;
+      if (tok !== PV.token) return;
+      if (!bu) { pvMsg('Sorry, this clip can’t be previewed.'); return; }
+      pvMsg(''); loadPv(c, bu, 'copy', startAt, tok);
+    }).catch(() => { settled2 = true; if (tok === PV.token) pvMsg('Sorry, this clip can’t be previewed.'); });
+  };
+  const fail = () => {
+    if (settled || tok !== PV.token) return; settled = true;
+    if (mode === 'orig') useCopy(); else pvMsg('Sorry, this clip can’t be previewed.');
+  };
+  if (mode === 'orig-skip') { mode = 'orig'; settled = true; useCopy(); return; }
+  pv.onerror = fail;
+  pv.onloadedmetadata = () => { if (!pv.videoWidth) fail(); };
+  pv.onloadeddata = () => {
+    if (tok !== PV.token) return; settled = true; pvMsg('');
+    pv.muted = PV.muted || mode !== 'orig';
+    if (startAt) pv.currentTime = startAt;
+    pv.play().catch(() => {}); layoutGuide(); updPvBar();
+  };
+  if (mode === 'orig') setTimeout(() => { if (!settled && tok === PV.token) fail(); }, 4000);   // no picture after 4s: use the copy
+  pv.src = url;
+}
+let pvLblLast = '';
+function updPvBar() {
+  const c = PV.clip; if (!c || !S.p) return;
+  const dur = slotDur(S.sel), photo = isPhoto(c), own = isOwnClip();
+  if (!photo) { if (own) PV.win = inStart(S.p.slots[S.sel], c, dur); else setWin(PV.win); }
+  const lbl = photo ? `Shot ${S.sel + 1} shows this photo for <b>${dur.toFixed(2)}s</b>`
+    : `Shot ${S.sel + 1} plays <b>${winDur().toFixed(2)}s</b> from <b>${fmtT(PV.win)}</b>${speedOf(S.p.slots[S.sel]) !== 1 ? ` at <b>${speedOf(S.p.slots[S.sel])}×</b>` : ''}${c.d + 0.05 < dur * speedOf(S.p.slots[S.sel]) ? ' · clip is shorter than the shot' : ''}`;
+  if (lbl !== pvLblLast) { $('#pvPartLbl').innerHTML = lbl; pvLblLast = lbl; }
+  if (!photo) {
+    const d = Math.max(0.01, c.d), t = pv.currentTime || 0;
+    $('#pvHead').style.left = (t / d * 100) + '%';
+    $('#pvWin').style.left = (PV.win / d * 100) + '%'; $('#pvWin').style.width = (Math.min(1, winDur() / d) * 100) + '%';
+    $('#pvTime').textContent = fmtT(t) + ' / ' + fmtT(c.d);
+  }
+  renderPvUse();
+}
+function renderPvUse() {
+  const c = PV.clip, b = $('#pvUse'); if (!c || !S.p || !b) return;
+  const own = isOwnClip(), photo = isPhoto(c), k = S.sel + 1;
+  b.disabled = own;
+  b.textContent = own ? `✓ In shot ${k}` : photo ? `Use this photo in shot ${k}` : `Use this part in shot ${k}`;
+  b.title = own ? (photo ? 'This photo is in the shot. Changes here apply straight away.' : 'This is the clip in the shot: moving the teal box changes the part straight away.')
+    : photo ? `Puts this photo into shot ${k}` : `Puts the part in the teal box (${winDur().toFixed(2)}s from ${fmtT(PV.win)}) into shot ${k}`;
+}
+function loopCheck() {                          // keep playing just the chosen part, over and over
+  if (!PV.loop || !PV.clip || pv.paused || isPhoto(PV.clip)) return;
+  const end = PV.win + winDur();
+  if (pv.currentTime >= end - 0.01 || pv.currentTime < PV.win - 0.1) pv.currentTime = PV.win;
+}
+function pvTick() { loopCheck(); updPvBar(); if (!pv.paused) PV.raf = requestAnimationFrame(pvTick); }
+pv.addEventListener('timeupdate', loopCheck);     // backup for when animation frames are paused
+pv.addEventListener('ended', () => { if (PV.loop) { pv.currentTime = PV.win; pv.play().catch(() => {}); } });
+function layoutGuide() {
+  const c = PV.clip, g = $('#guide'); if (!c || $('#clipWrap').hidden) return;
+  const box = $('#clipBox').getBoundingClientRect(), vw = c.w || 16, vh = c.h || 9;
+  if (Math.abs(vw / vh - FA) < 0.02 || !box.width) { g.hidden = true; return; }   // the part of the clip the reel's shape keeps
+  const sc = Math.min(box.width / vw, box.height / vh), dw = vw * sc, dh = vh * sc;
+  const [gw, gh] = vw / vh > FA ? [dh * FA, dh] : [dw, dw / FA];
+  g.hidden = false; g.style.left = ((box.width - dw) / 2 + (dw - gw) / 2) + 'px'; g.style.top = ((box.height - dh) / 2 + (dh - gh) / 2) + 'px';
+  g.style.width = gw + 'px'; g.style.height = gh + 'px';
+}
+pv.addEventListener('play', () => { pv.playbackRate = PV.loop && S.p ? speedOf(S.p.slots[S.sel]) : 1; stop(); $('#pvPlay').textContent = '❚❚'; cancelAnimationFrame(PV.raf); PV.raf = requestAnimationFrame(pvTick); });
+pv.addEventListener('pause', () => { $('#pvPlay').textContent = '▶'; updPvBar(); });
+pv.addEventListener('seeked', updPvBar);
+pv.addEventListener('click', () => pv.paused ? pv.play().catch(() => {}) : pv.pause());
+$('#pvPlay').onclick = () => pv.paused ? pv.play().catch(() => {}) : pv.pause();
+$('#pvMute').onclick = () => { PV.muted = !PV.muted; pv.muted = PV.muted; $('#pvMute').textContent = PV.muted ? '🔇' : '🔊'; };
+$('#pvClose').onclick = () => setSideTab('orig');
+$('#tabOrig').onclick = () => setSideTab('orig');
+$('#tabClip').onclick = () => setSideTab('clip');
+$('#pvUse').onclick = () => {
+  const c = PV.clip; if (!c || isOwnClip()) return;
+  const k = S.sel, photo = isPhoto(c), from = PV.win;
+  assignClip(c, photo ? 0 : from, photo ? $('#pvMove').value : undefined);
+  toast(photo ? `Shot ${k + 1} now shows this photo` : `Shot ${k + 1} now plays this clip from ${fmtT(from)}`);
+  updPvBar();
+};
+$('#pvLoop').onclick = () => { PV.loop = !PV.loop; setLoopBtn(); if (PV.loop) pv.currentTime = PV.win; pv.play().catch(() => {}); };
+$('#pvMove').addEventListener('change', e => { if (isOwnClip()) { pushHist(); S.p.slots[S.sel].move = e.target.value; afterChange(); } });
+$('#pvScrub').addEventListener('pointerdown', e => {
+  const c = PV.clip; if (!c || isPhoto(c) || e.button !== 0) return;
+  e.preventDefault();
+  const el = $('#pvScrub'), r = el.getBoundingClientRect(), wd = winDur(), k = S.sel, s = S.p.slots[k], own = isOwnClip();
+  const tAt = x => clamp((x - r.left) / r.width, 0, 1) * c.d;
+  const t0 = tAt(e.clientX), grab = (t0 >= PV.win && t0 <= PV.win + wd) ? t0 - PV.win : wd / 2;   // grab the box, or centre it on the click
+  if (own) pushHist();
+  pv.pause();
+  const apply = x => {
+    setWin(tAt(x) - grab); pv.currentTime = PV.win;
+    if (own) { s.in = PV.win; if (slotAt(S.frame) !== k) S.frame = bounds()[k]; showFrame(S.frame); }
+    updPvBar();
+  };
+  try { el.setPointerCapture(e.pointerId); } catch (err) {}
+  apply(e.clientX);
+  const move = ev => apply(ev.clientX);
+  const up = () => {
+    el.removeEventListener('pointermove', move); el.removeEventListener('pointerup', up);
+    PV.loop = true; setLoopBtn(); pv.currentTime = PV.win; pv.play().catch(() => {});
+    if (own) afterChange();
+  };
+  el.addEventListener('pointermove', move); el.addEventListener('pointerup', up);
+});
+window.addEventListener('resize', layoutGuide);
+
+// ------------------------------------------------------------------ drag & drop: library clip -> any shot, shot -> shot (swap)
+let dragData = null;
+function swapSlots(a, b) {
+  if (a === b) return;
+  pushHist();
+  const A = S.p.slots[a], B = S.p.slots[b];
+  for (const key of ['clip', 'in', 'cx', 'cy', 'zoom', 'fit', 'rot', 'speed', 'reverse', 'move', 'look']) { const t = A[key]; A[key] = B[key]; B[key] = t; if (A[key] === undefined) delete A[key]; if (B[key] === undefined) delete B[key]; }
+  S.sel = b; S.selText = null; afterChange();
+  toast(`Swapped shots ${a + 1} and ${b + 1}`);
+}
+function dropClipOn(k, c) {
+  const pvd = PV.clip && PV.clip.id === c.id, photo = isPhoto(c);
+  S.sel = k; S.selText = null;
+  const startAt = pvd && !photo ? clamp(PV.win, 0, Math.max(0, c.d - slotDur(k))) : undefined;   // previewing it? use the chosen part
+  assignClip(c, startAt, photo && pvd ? $('#pvMove').value : undefined);
+  toast(photo ? `Shot ${k + 1} now shows this photo` : `Shot ${k + 1} now uses this clip${startAt !== undefined ? ' from ' + fmtT(startAt) : ''}`);
+  if (pvd) updPvBar();
+}
+$('#libGrid').addEventListener('dragstart', e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const c = libList[+card.dataset.i]; dragData = {type: 'clip', c};
+  e.dataTransfer.effectAllowed = 'copy'; e.dataTransfer.setData('text/plain', 'clip:' + c.id);
+  const img = card.querySelector('img'); if (img) e.dataTransfer.setDragImage(img, 40, 40);
+});
+$('#vtrack').addEventListener('dragstart', e => {
+  const sl = e.target.closest('.slot'); if (!sl) return;
+  dragData = {type: 'slot', k: +sl.dataset.k};
+  e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', 'shot:' + sl.dataset.k);
+});
+document.addEventListener('dragend', () => { dragData = null; document.querySelectorAll('.drop').forEach(el => el.classList.remove('drop')); });
+$('#vtrack').addEventListener('dragover', e => {
+  const sl = e.target.closest('.slot'); if (!sl || !dragData) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = dragData.type === 'clip' ? 'copy' : 'move';
+  document.querySelectorAll('#vtrack .slot.drop').forEach(el => { if (el !== sl) el.classList.remove('drop'); });
+  if (!(dragData.type === 'slot' && +sl.dataset.k === dragData.k)) sl.classList.add('drop');
+});
+$('#vtrack').addEventListener('dragleave', e => { const sl = e.target.closest('.slot'); if (sl && !sl.contains(e.relatedTarget)) sl.classList.remove('drop'); });
+$('#vtrack').addEventListener('drop', e => {
+  const sl = e.target.closest('.slot'); if (!sl || !dragData) return;
+  e.preventDefault(); stop();
+  const k = +sl.dataset.k, d = dragData; dragData = null;
+  document.querySelectorAll('.drop').forEach(el => el.classList.remove('drop'));
+  if (d.type === 'clip') dropClipOn(k, d.c); else swapSlots(d.k, k);
+});
+const cvWrap = $('#cvWrap');
+cvWrap.addEventListener('dragover', e => { if (dragData && dragData.type === 'clip') { e.preventDefault(); e.dataTransfer.dropEffect = 'copy'; cvWrap.classList.add('drop'); } });
+cvWrap.addEventListener('dragleave', e => { if (!cvWrap.contains(e.relatedTarget)) cvWrap.classList.remove('drop'); });
+cvWrap.addEventListener('drop', e => {
+  if (!dragData || dragData.type !== 'clip') return;
+  e.preventDefault(); stop(); cvWrap.classList.remove('drop');
+  const c = dragData.c; dragData = null; dropClipOn(slotAt(S.frame), c);
+});
+
+// ------------------------------------------------------------------ text editor bubble (double-click a text on the video or on the timeline)
+let TE = null;
+function textScreenRect(L) {
+  const cr = cv.getBoundingClientRect(), R = getRes(L), rc = R && layerRect(L, R), sx = cr.width / VW, sy = cr.height / VH;
+  if (!rc) { const y = cr.top + L.y * cr.height; return {left: cr.left, width: cr.width, top: y - 20, bottom: y + 20}; }
+  return {left: cr.left + rc.x * sx, width: rc.w * sx, top: cr.top + rc.y * sy, bottom: cr.top + (rc.y + rc.h) * sy};
+}
+function placeTextEditor() {
+  if (!TE) return;
+  const box = $('#txEdit'), L = textById(TE.id); if (!L) return;
+  let r;
+  if (TE.anchor === 'block') { const el = document.querySelector(`#ttrack .tx[data-id="${CSS.escape(L.id)}"]`); r = el ? el.getBoundingClientRect() : null; }
+  if (!r) r = textScreenRect(L);
+  const bw = box.offsetWidth, bh = box.offsetHeight;
+  let x = r.left + r.width / 2 - bw / 2, y = TE.anchor === 'block' ? r.top - bh - 10 : r.bottom + 12;
+  if (TE.anchor !== 'block' && y + bh > innerHeight - 8) y = r.top - bh - 12;
+  if (y < 8) y = Math.min(innerHeight - bh - 8, r.bottom + 12);
+  box.style.left = clamp(x, 8, innerWidth - bw - 8) + 'px'; box.style.top = clamp(y, 8, innerHeight - bh - 8) + 'px';
+}
+function fitTa() { const t = $('#teT'); t.style.height = 'auto'; t.style.height = Math.min(160, t.scrollHeight + 2) + 'px'; }
+function renderTeTools() {
+  const L = textById(TE.id); if (!L) return;
+  $('#teCol').innerHTML = swatchHtml(L);
+  $('#teStyle').innerHTML = Object.entries(S.styles).map(([k, v]) => `<option value="${k}" ${k === L.style ? 'selected' : ''}>${esc(v.label)}</option>`).join('');
+  wireSwatches($('#teCol'), L, () => { afterTextEdit(); renderTeTools(); });
+}
+function afterTextEdit() { renderTextTrack(); renderInspector(); paint(S.frame); markDirty(); placeTextEditor(); }
+function openTextEditor(id, anchor = 'canvas', selectAll = false) {
+  const L = textById(id); if (!L) return;
+  stop(); closeLookPop();
+  if (S.selText !== id) selectText(id);
+  if (S.frame < L.f0 || S.frame >= L.f1) showFrame(L.f0);
+  TE = {id, anchor, before: JSON.parse(JSON.stringify(L)), typed: false};
+  $('#txEdit').hidden = false;
+  const t = $('#teT'); t.value = L.text; fitTa(); renderTeTools();
+  placeTextEditor();
+  t.focus(); if (selectAll) t.select(); else t.setSelectionRange(t.value.length, t.value.length);
+}
+function closeTextEditor(keep = true) {
+  if (!TE) return;
+  const L = textById(TE.id), te = TE; TE = null; $('#txEdit').hidden = true;
+  if (!keep && L) { for (const k of Object.keys(L)) delete L[k]; Object.assign(L, te.before); }
+  if (S.p) afterChange();
+}
+$('#teT').addEventListener('input', () => {
+  const L = TE && textById(TE.id); if (!L) return;
+  if (!TE.typed) { pushHist(); TE.typed = true; }
+  L.text = $('#teT').value; fitTa(); renderTextTrack(); paint(S.frame); markDirty(); placeTextEditor();
+});
+$('#teT').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); closeTextEditor(true); }
+  else if (e.key === 'Escape') { e.preventDefault(); closeTextEditor(false); }
+});
+$('#teStyle').addEventListener('change', e => { const L = textById(TE.id); pushHist(); L.style = e.target.value; L.xs = S.styles[L.style].xs; if (S.styles[L.style].arc && !L.r) L.r = 542; afterTextEdit(); renderTeTools(); });
+const teSize = f => { const L = textById(TE.id); pushHist(); L.size = clamp(Math.round(L.size * f), 16, 260); afterTextEdit(); };
+$('#teSm').onclick = () => teSize(1 / 1.12); $('#teLg').onclick = () => teSize(1.12);
+$('#teDone').onclick = () => closeTextEditor(true);
+$('#teDel').onclick = () => { const id = TE.id; closeTextEditor(true); deleteText(id); };
+$('#teMore').onclick = () => { const id = TE.id; closeTextEditor(true); setInsp(true); S.selText = id; renderInspector(); };
+document.addEventListener('pointerdown', e => {
+  if (TE && !e.target.closest('#txEdit')) closeTextEditor(true);
+  if (!$('#lookPop').hidden && !e.target.closest('#lookPop, #lookBtn, #tl, #cvWrap')) closeLookPop();   // stays open while you pick shots
+}, true);
+
+// ------------------------------------------------------------------ colour panel: looks, sliders, whole reel or one shot
+const LK = {tab: 'looks', scope: 'reel', cat: 'All'};
+let lkHist = false, thumbRaf = 0;
+function readC() { return LK.scope === 'shot' ? colourOf(S.sel) : {grade: curLook(), amt: curAmt(), adj: S.p.adj || {}}; }
+function writeC(ch) {                         // ch = {grade?, amt?, adj?}
+  if (LK.scope === 'shot') {
+    const s = S.p.slots[S.sel];
+    if (!s.look) s.look = JSON.parse(JSON.stringify(colourOf(S.sel)));
+    Object.assign(s.look, ch);
+  } else {
+    if ('grade' in ch) S.p.grade = ch.grade;
+    if ('amt' in ch) S.p.grade_amt = ch.amt;
+    if ('adj' in ch) S.p.adj = ch.adj;
+  }
+}
+function colourChanged(full) {                // cheap refresh while dragging, full refresh at the end
+  paint(S.frame); renderHeader(); markDirty(); queueThumbs(); syncLookPop();
+  if (full) { renderTimeline(); }
+}
+function queueThumbs() { cancelAnimationFrame(thumbRaf); thumbRaf = requestAnimationFrame(drawLookThumbs); }
+function openLookPop() {
+  const pop = $('#lookPop'); pop.hidden = false;
+  LK.scope = S.p.slots[S.sel]?.look ? 'shot' : LK.scope;
+  const cats = ['All', ...new Set(lookList.map(L => L.group))];
+  $('#lookCats').innerHTML = cats.map(c => `<button class="chip" data-c="${esc(c)}" aria-pressed="${c === LK.cat}">${esc(c)}</button>`).join('');
+  $('#adjPane').innerHTML = (() => {
+    let h = '', grp = '';
+    for (const [k, lbl, mn, mx, st, g] of ADJ) {
+      if (g !== grp) { h += `<h4>${g}</h4>`; grp = g; }
+      h += `<div class="adj"><span class="lbl" title="Double-click to reset">${lbl}</span><input type="range" data-k="${k}" min="${mn}" max="${mx}" step="${st}" ${k.endsWith('h') ? 'class="hue"' : ''}><span class="v" data-v="${k}"></span></div>`;
+    }
+    h += `<h4>Effects · whole reel</h4>` + FX.map(([k, lbl]) => `<div class="adj"><span class="lbl" title="Double-click to reset">${lbl}</span><input type="range" data-fx="${k}" min="0" max="1" step="0.01"><span class="v" data-vfx="${k}"></span></div>`).join('');
+    return h + `<div class="row" style="margin-top:12px"><button id="adjReset">Reset sliders</button><button id="fxReset">Reset effects</button></div>`;
+  })();
+  renderLookGrid(); syncLookPop();
+  const b = $('#lookBtn').getBoundingClientRect(), cr = cvWrap.getBoundingClientRect();   // beside the reel, so you can watch it change
+  pop.style.top = (b.bottom + 6) + 'px'; pop.style.left = clamp(cr.right + 14, 8, innerWidth - pop.offsetWidth - 8) + 'px';
+  pop.style.maxHeight = Math.max(320, $('footer').getBoundingClientRect().top - b.bottom - 14) + 'px';   // keep the timeline free
+  $('#adjReset').onclick = () => { pushHist(); writeC({adj: {}}); colourChanged(true); };
+  $('#fxReset').onclick = () => { pushHist(); S.p.fx = {}; colourChanged(true); };
+}
+function renderLookGrid() {
+  const cur = readC().grade;
+  $('#lookGrid').innerHTML = lookList.filter(L => LK.cat === 'All' || L.group === LK.cat).map(L =>
+    `<button class="lk ${L.key === cur ? 'on' : ''}" data-k="${L.key}" title="${esc(L.label)} · ${esc(L.group)}"><canvas width="116" height="206"></canvas><span>${esc(L.label)}</span></button>`).join('');
+  queueThumbs();
+}
+// put every control in the colour panel in step with the reel / shot being coloured
+function syncLookPop() {
+  if ($('#lookPop').hidden) return;
+  const C = readC(), s = S.p.slots[S.sel], n = S.sel + 1;
+  $('#lookTabs').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === LK.tab));
+  $('#lookScope').querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', b.dataset.v === LK.scope));
+  $('#lookScope [data-v="shot"]').textContent = `Shot ${n} only`;
+  $('#lookPane').hidden = LK.tab !== 'looks'; $('#adjPane').hidden = LK.tab !== 'adjust';
+  const note = LK.scope === 'shot'
+    ? (s.look ? `<span class="meta" style="flex:1">Shot ${n} has its own colour.</span><button id="lkUseReel">Use the reel’s colour</button><button id="lkToAll" title="Make this the colour of the whole reel">Use for whole reel</button>`
+              : `<span class="meta">Changes here only colour shot ${n}.</span>`)
+    : `<span class="meta">Colours every shot${S.p.slots.some(x => x.look) ? ' (except shots with their own colour 🎨)' : ''}. Hover a look to try it.</span>`;
+  if ($('#lookNote').dataset.h !== note) {
+    $('#lookNote').innerHTML = note; $('#lookNote').dataset.h = note;
+    const ur = $('#lkUseReel'); if (ur) ur.onclick = () => { pushHist(); delete S.p.slots[S.sel].look; colourChanged(true); renderLookGrid(); };
+    const ta = $('#lkToAll'); if (ta) ta.onclick = () => { pushHist(); const L = S.p.slots[S.sel].look; S.p.grade = L.grade; S.p.grade_amt = L.amt; S.p.adj = {...L.adj}; delete S.p.slots[S.sel].look; LK.scope = 'reel'; colourChanged(true); renderLookGrid(); };
+  }
+  if (document.activeElement !== $('#lookAmt')) $('#lookAmt').value = C.amt ?? 1;
+  $('#lookAmtV').textContent = Math.round((C.amt ?? 1) * 100) + '%';
+  document.querySelectorAll('#lookGrid .lk').forEach(x => x.classList.toggle('on', x.dataset.k === C.grade));
+  const a = C.adj || {}, fx = S.p.fx || {};
+  document.querySelectorAll('#adjPane input[data-k]').forEach(el => {
+    const k = el.dataset.k, v = +a[k] || 0;
+    if (document.activeElement !== el) el.value = v;
+    const out = document.querySelector(`#adjPane [data-v="${k}"]`);
+    out.textContent = k.endsWith('h') ? Math.round(v) + '°' : (k === 'sta' || k === 'hia' || k === 'fade') ? Math.round(v * 100 / (k === 'fade' ? 0.25 : 1)) + '%' : (v > 0 ? '+' : '') + Math.round(v * 100);
+  });
+  document.querySelectorAll('#adjPane input[data-fx]').forEach(el => {
+    const v = +fx[el.dataset.fx] || 0; if (document.activeElement !== el) el.value = v;
+    document.querySelector(`#adjPane [data-vfx="${el.dataset.fx}"]`).textContent = Math.round(v * 100) + '%';
+  });
+}
+function closeLookPop() { $('#lookPop').hidden = true; if (S.hoverLook) { S.hoverLook = null; paint(S.frame); } }
+function drawLookThumbs() {
+  if (!GLT || !S.p || $('#lookPop').hidden || LK.tab !== 'looks') return;
+  const k = LK.scope === 'shot' ? S.sel : slotAt(S.frame), f = LK.scope === 'shot' && slotAt(S.frame) !== k ? bounds()[k] : S.frame;
+  const info = slotSource(k, f); if (!info) return;
+  const s = S.p.slots[k], m = moveAt(k, f), C = readC();
+  document.querySelectorAll('#lookGrid .lk').forEach(btn => {
+    glDraw(GLT, info.src, info.sw, info.sh, s, {grade: btn.dataset.k, amt: C.amt || 1, adj: C.adj}, m, null);
+    btn.querySelector('canvas').getContext('2d').drawImage(GLT.canvas, 0, 0);
+  });
+}
+$('#lookBtn').onclick = () => $('#lookPop').hidden ? openLookPop() : closeLookPop();
+$('#lookTabs').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; LK.tab = b.dataset.v; syncLookPop(); queueThumbs(); });
+$('#lookScope').addEventListener('click', e => {
+  const b = e.target.closest('button'); if (!b) return;
+  LK.scope = b.dataset.v;
+  if (LK.scope === 'shot' && slotAt(S.frame) !== S.sel) showFrame(bounds()[S.sel]);
+  renderLookGrid(); syncLookPop();
+});
+$('#lookCats').addEventListener('click', e => {
+  const b = e.target.closest('[data-c]'); if (!b) return;
+  LK.cat = b.dataset.c; $('#lookCats').querySelectorAll('.chip').forEach(x => x.setAttribute('aria-pressed', x === b)); renderLookGrid();
+});
+$('#lookGrid').addEventListener('click', e => {
+  const b = e.target.closest('.lk'); if (!b) return;
+  pushHist(); S.hoverLook = null;
+  writeC({grade: b.dataset.k, amt: readC().amt || 1});
+  colourChanged(true);
+});
+$('#lookGrid').addEventListener('mouseover', e => { const b = e.target.closest('.lk'); if (b && S.hoverLook !== b.dataset.k) { S.hoverLook = b.dataset.k; paint(S.frame); } });
+$('#lookGrid').addEventListener('mouseleave', () => { S.hoverLook = null; paint(S.frame); });
+$('#lookAmt').addEventListener('input', e => {
+  if (!lkHist) { pushHist(); lkHist = true; }
+  writeC({amt: +(+e.target.value).toFixed(2)}); colourChanged(false);
+});
+$('#adjPane').addEventListener('input', e => {
+  const el = e.target; if (!el.matches('input[type=range]')) return;
+  if (!lkHist) { pushHist(); lkHist = true; }
+  const v = +(+el.value).toFixed(3);
+  if (el.dataset.k) { const a = {...(readC().adj || {})}; if (v) a[el.dataset.k] = v; else delete a[el.dataset.k]; writeC({adj: a}); }
+  else { const fx = {...(S.p.fx || {})}; if (v) fx[el.dataset.fx] = v; else delete fx[el.dataset.fx]; S.p.fx = fx; }
+  colourChanged(false);
+});
+$('#adjPane').addEventListener('dblclick', e => {           // double-click a slider's name to reset it
+  const row = e.target.closest('.adj'); if (!row || !e.target.classList.contains('lbl')) return;
+  const el = row.querySelector('input'); pushHist();
+  if (el.dataset.k) { const a = {...(readC().adj || {})}; delete a[el.dataset.k]; writeC({adj: a}); }
+  else { const fx = {...(S.p.fx || {})}; delete fx[el.dataset.fx]; S.p.fx = fx; }
+  colourChanged(true);
+});
+for (const ev of ['change', 'pointerup']) $('#lookPop').addEventListener(ev, () => { if (lkHist) { lkHist = false; renderTimeline(); } });
+
+// ------------------------------------------------------------------ full screen reel
+const isFs = () => cvWrap.classList.contains('fs');
+function setBig(on, pseudo) {                 // pseudo = fill the browser window when real full screen isn't allowed
+  cvWrap.classList.toggle('fs', on); cvWrap.classList.toggle('pseudo', on && !!pseudo); cvWrap.classList.remove('idle');
+  if (on) { cvWrap.classList.remove('sized'); cvWrap.style.width = cvWrap.style.height = ''; } else sizeScreen();
+  sizeCanvas(on);                               // sharp picture on a big screen
+  if (S.p) { paint(S.frame); updFsBar(); }
+  if (on) fsWake();
+}
+function toggleFs() {
+  if (document.fullscreenElement) { document.exitFullscreen(); return; }
+  if (cvWrap.classList.contains('pseudo')) { setBig(false); return; }
+  closeTextEditor(true); closeLookPop();
+  let settled = false;
+  const fallback = () => { if (!settled && !document.fullscreenElement) { settled = true; setBig(true, true); } };
+  try { cvWrap.requestFullscreen().then(() => { settled = true; }, fallback); } catch (e) { fallback(); }
+  setTimeout(fallback, 700);
+}
+let fsIdleT = 0;
+function fsWake() { cvWrap.classList.remove('idle'); clearTimeout(fsIdleT); fsIdleT = setTimeout(() => { if (isFs() && S.playing) cvWrap.classList.add('idle'); }, 2200); }
+function updFsBar() {
+  if (!isFs() || !S.p) return;
+  $('#fsFill').style.width = (S.frame / Math.max(1, S.T.total - 1) * 100) + '%';
+  $('#fsTime').textContent = fmt(S.frame) + ' / ' + fmt(S.T.total);
+  $('#fsPlay').textContent = S.playing ? '❚❚' : '▶';
+}
+document.addEventListener('fullscreenchange', () => setBig(document.fullscreenElement === cvWrap, false));
+$('#fsBtn').onclick = toggleFs;
+$('#fsExit').onclick = toggleFs;
+$('#fsPlay').onclick = e => { e.stopPropagation(); toggle(); updFsBar(); fsWake(); };
+cvWrap.addEventListener('pointermove', () => { if (isFs()) fsWake(); });
+$('#fsProg').addEventListener('pointerdown', e => {
+  e.stopPropagation();
+  const r = $('#fsProg').getBoundingClientRect(), was = S.playing;
+  stop(); showFrame(clamp((e.clientX - r.left) / r.width, 0, 1) * (S.T.total - 1)); updFsBar();
+  if (was) play();
+});
+
+// ------------------------------------------------------------------ right-hand panel: hide / show
+function setInsp(open) {
+  $('#app').classList.toggle('inspClosed', !open);
+  const b = $('#inspToggle'); b.textContent = open ? '⟩' : '⟨'; b.title = open ? 'Hide this panel' : 'Show shot and text details';
+  try { localStorage.setItem('rs-insp', open ? 'open' : 'closed'); } catch (e) {}
+  requestAnimationFrame(() => { layoutGuide(); if (S.p) renderTimeline(); });
+}
+$('#inspHead').addEventListener('click', e => {
+  const closed = $('#app').classList.contains('inspClosed');
+  if (closed || e.target.closest('#inspToggle')) setInsp(closed);
+});
+{ let st = null; try { st = localStorage.getItem('rs-insp'); } catch (e) {} setInsp(st === 'open'); }
+
+// ------------------------------------------------------------------ export
+async function exportReel() {
+  stop(); await save();
+  try { const r = await api('/api/render', {id:S.p.id, format: $('#expFmt').value || undefined, quality: $('#expQ').value}); if (!r.ok) { toast(esc(r.msg)); return; } }
+  catch (e) { toast('Could not start export: ' + esc(e.message)); return; }
+  $('#export').disabled = true; pollRender();
+}
+function pollRender() {
+  api('/api/render-status').then(st => {
+    const pill = $('#renderState'); pill.hidden = false;
+    if (st.state === 'running') {
+      pill.className = 'pill on'; pill.textContent = st.total > 1 ? `Exporting… shot ${Math.min(st.done + 1, st.total - 1)}/${st.total - 1}` : 'Exporting…';
+      if (st.done >= st.total - 1 && st.total > 1) pill.textContent = 'Exporting… adding text and music';
+      setTimeout(pollRender, 700);
+    } else {
+      $('#export').disabled = false;
+      if (st.state === 'done') {
+        pill.className = 'pill on'; pill.textContent = 'Exported ✓';
+        toast(`Saved to Reels\\${esc(st.file)} <button id="tPlay">Play</button><button id="tOpen">Show in folder</button>`, 12000);
+        $('#tPlay').onclick = () => window.open('/reels/' + encodeURIComponent(st.file) + '?t=' + Date.now(), '_blank');
+        $('#tOpen').onclick = () => api('/api/open-folder', {});
+      } else if (st.state === 'error') { pill.className = 'pill'; pill.textContent = 'Export failed'; toast('Export failed: ' + esc(st.msg), 10000); }
+    }
+  }).catch(() => setTimeout(pollRender, 1500));
+}
+
+// ------------------------------------------------------------------ wiring
+$('#play').onclick = toggle;
+$('#prevF').onclick = () => { stop(); showFrame(S.frame - 1); };
+$('#nextF').onclick = () => { stop(); showFrame(S.frame + 1); };
+function jumpCut(dir) { stop(); const b = bounds(); const t = dir > 0 ? b.find(x => x > S.frame) : [...b].reverse().find(x => x < S.frame); if (t !== undefined) showFrame(Math.min(t, S.T.total - 1)); }
+$('#prevCut').onclick = () => jumpCut(-1);
+$('#nextCut').onclick = () => jumpCut(1);
+$('#undo').onclick = undo; $('#redo').onclick = redo;
+$('#splitT').onclick = split; $('#mergeT').onclick = mergeNext; $('#resetBeats').onclick = resetBeats;
+$('#addText').onclick = addText; $('#resetText').onclick = resetText;
+$('#zoom').addEventListener('input', e => { S.ppf = +e.target.value; renderTimeline(); });
+$('#fitTl').onclick = () => { fitTimeline(); renderTimeline(); };
+$('#kind').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; LF.kind = b.dataset.v; LF.shown = 120; $('#kind').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderLib(); });
+$('#pname').addEventListener('change', e => { const v = e.target.value.trim(); if (!v) { e.target.value = S.p.name; return; } pushHist(); S.p.name = v; markDirty(); });
+$('#export').onclick = exportReel;
+$('#proj').addEventListener('change', async e => {
+  const v = e.target.value;
+  if (v.startsWith('new:')) { const key = v.slice(4); await newProject(S.starters[key], S.templates[key].title + ' – new idea'); return; }
+  await save(); const p = S.projects.find(x => x.id === v); if (p) openProject(p);
+});
+$('#dup').onclick = () => newProject(S.p, S.p.name + ' (copy)');
+$('#del').onclick = async () => {
+  if (!confirm(`Delete the project “${S.p.name}”?\n\nThis removes the editing project only. Videos you already exported stay in the Reels folder.`)) return;
+  clearTimeout(saveT); await saving;
+  await api('/api/project/delete', {id:S.p.id});
+  S.projects = S.projects.filter(x => x.id !== S.p.id);
+  if (S.projects.length) openProject(S.projects[0]); else { S.p = null; await newProject(S.starters.A, 'Reel A – new idea'); }
+};
+$('#q').addEventListener('input', e => { LF.q = e.target.value.trim(); LF.shown = 120; renderLib(); });
+$('#loc').addEventListener('change', e => { LF.loc = e.target.value; LF.shown = 120; renderLib(); });
+$('#colSel').addEventListener('change', e => { const v = e.target.value; if (v === '__add') addFolder(); else setCol(v); });
+$('#orient').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; LF.orient = b.dataset.v; $('#orient').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x === b)); renderLib(); });
+$('#tagChips').addEventListener('click', e => { const b = e.target.closest('[data-tag]'); if (!b) return; const t = b.dataset.tag; LF.tags.has(t) ? LF.tags.delete(t) : LF.tags.add(t); b.setAttribute('aria-pressed', LF.tags.has(t)); renderLib(); });
+for (const id of ['fits', 'hideBad', 'usedOnly']) $('#' + id).addEventListener('click', e => { LF[id] = !LF[id]; e.currentTarget.setAttribute('aria-pressed', LF[id]); renderLib(); });
+$('#libGrid').addEventListener('click', e => {
+  if (e.target.id === 'libMore') { LF.shown += 120; renderLib(); return; }
+  const card = e.target.closest('.card'); if (!card) return;
+  const c = libList[+card.dataset.i];
+  if (e.target.closest('.add')) { const k = S.sel; assignClip(c); toast(`Put in shot ${k + 1}`); return; }
+  previewClip(c);
+});
+let warmT = 0;
+$('#warm').onclick = async () => {
+  const ids = libList.filter(c => !isPhoto(c)).map(c => c.id);
+  if (!ids.length) { toast('Photos are always instant ✓'); return; }
+  if (ids.length > 150 && !confirm(`Prepare previews for ${ids.length} clips? It runs in the background while you work and uses about ${Math.round(ids.length * 4 / 100) / 10} GB of disk space.`)) return;
+  const r = await api('/api/warm', {ids});
+  toast(r.queued ? `Preparing ${r.queued} previews in the background…` : 'These clips already have instant previews ✓');
+  clearTimeout(warmT); warmStatus();
+};
+async function warmStatus() {
+  let st; try { st = await api('/api/warm-status'); } catch (e) { return; }
+  $('#warm').textContent = st.left ? `⚡ ${st.left} previews to go…` : '⚡ Instant previews';
+  if (st.left) warmT = setTimeout(warmStatus, 3000);
+}
+$('#libGrid').addEventListener('dblclick', e => {
+  const card = e.target.closest('.card'); if (!card || e.target.closest('.add')) return;
+  assignClip(libList[+card.dataset.i]);
+});
+$('#libGrid').addEventListener('mousemove', e => {
+  const card = e.target.closest('.card'); if (!card) return;
+  const c = libList[+card.dataset.i]; if (!c || c.n < 2) return;
+  const r = card.getBoundingClientRect(), k = clamp(Math.floor((e.clientX - r.left) / r.width * c.n), 0, c.n - 1);
+  const img = card.querySelector('img'); const u = thumbUrl(c, k); if (img.getAttribute('src') !== u) img.src = u;
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && !$('#lookPop').hidden) { closeLookPop(); return; }
+  if (e.key === 'Escape' && cvWrap.classList.contains('pseudo')) { setBig(false); return; }
+  if (e.target.matches?.('input, select, textarea')) return;
+  const k = e.key.toLowerCase();
+  if (e.code === 'Space') { e.preventDefault(); toggle(); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+  else if ((e.ctrlKey || e.metaKey) && k === 'y') { e.preventDefault(); redo(); }
+  else if (k === 's' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); split(); }
+  else if (e.key === 'ArrowRight') { e.preventDefault(); e.shiftKey ? jumpCut(1) : (stop(), showFrame(S.frame + 1)); }
+  else if (e.key === 'ArrowLeft') { e.preventDefault(); e.shiftKey ? jumpCut(-1) : (stop(), showFrame(S.frame - 1)); }
+  else if (k === 'f' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); toggleFs(); }
+  else if (e.key === 'Enter' && S.selText && !e.target.closest?.('button')) { e.preventDefault(); openTextEditor(S.selText, 'canvas'); }
+  else if (e.key === 'Escape' && !$('#clipWrap').hidden) setSideTab('orig');
+  else if (e.key === 'Escape' && S.selText) { S.selText = null; renderTextTrack(); renderInspector(); paint(S.frame); }
+  else if ((e.key === 'Delete' || e.key === 'Backspace') && S.selText) { e.preventDefault(); deleteText(S.selText); }
+  else if (k === 't' && !e.ctrlKey && !e.metaKey) { e.preventDefault(); addText(); }
+  else if (e.key === ']') selectSlot(S.sel + 1);
+  else if (e.key === '[') selectSlot(S.sel - 1);
+});
+window.addEventListener('resize', () => { if (S.p) renderTimeline(); });
+window.addEventListener('beforeunload', () => { if (S.p) navigator.sendBeacon && fetch('/api/project', {method:'POST', keepalive:true, headers:{'Content-Type':'application/json'}, body:JSON.stringify(S.p)}); });
+
+// an open page notices when Reel Studio has been updated (new page or new program) and offers to reload
+(function watchUpdates() {
+  let first = null;
+  const check = async () => {
+    try {
+      const v = await (await fetch('/api/version', {cache: 'no-store'})).json(), key = v.page + ':' + v.code;
+      if (first === null) { first = key; return; }
+      if (key === first || $('#updBar')) return;
+      const bar = document.createElement('div'); bar.id = 'updBar';
+      bar.style.cssText = 'position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:200;background:var(--accent);color:#000;padding:8px 14px;border-radius:8px;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.45)';
+      bar.innerHTML = 'Reel Studio was updated with new features. <button id="updGo" style="margin-left:8px">Reload now</button>';
+      document.body.appendChild(bar);
+      $('#updGo').onclick = async () => { try { if (S.p) await save(); } catch (e) {} location.reload(); };
+    } catch (e) {}
+  };
+  check(); setInterval(check, 15000);
+})();
+(async function boot() {
+  try {
+    const d = await api('/api/init');
+    if (d.stale || !d.styles) {     // the page was updated but an older Reel Studio program is still running
+      $('#busy').innerHTML = `<div style="max-width:520px;text-align:center;line-height:1.6;color:var(--ink)">
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px">Reel Studio was updated — please restart it</div>
+        The old version is still running. Close the black <b>Reel Studio</b> window,
+        then double-click <b>Start Reel Studio.bat</b> again.<br>
+        <span style="color:var(--muted)">Your reels are saved. Nothing is lost.</span></div>`;
+      return;
+    }
+    S.lib = d.library.filter(c => c.n > 0); S.lib.forEach(c => S.byId[c.id] = c); S.cols = d.collections || [];
+    S.templates = d.templates; S.starters = d.starters; S.projects = d.projects; S.styles = d.styles;
+    lookList = d.looks || []; lookList.forEach(L => LOOKS[L.key] = L);
+    if (!S.projects.length) { showWelcome(); return; }        // a brand-new copy: ask for the first footage folder
+    buildLibFilters(); warmStatus();
+    let last = null; try { last = localStorage.getItem('rs-last'); } catch (e) {}
+    const p = S.projects.find(x => x.id === last) || S.projects[0];
+    openProject(p);
+    $('#busy').remove();
+  } catch (e) {
+    console.error(e);
+    const b = $('#busy');
+    if (b) b.textContent = 'Could not load Reel Studio: ' + e.message + ' — try closing the black Reel Studio window and starting it again.';
+  }
+})();
+</script>
+</body>
+</html>
