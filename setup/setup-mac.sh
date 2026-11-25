@@ -66,6 +66,9 @@ if [ "$SHORTCUT" = 1 ]; then
   ok "'Reel Studio' is on your Desktop (double-click it; the first time, right-click > Open if macOS asks)"
 fi
 
+# Remember where Reel Studio lives, so Claude's Reel Studio plugin can find it from any folder
+printf '%s' "$APP" > "$HOME/.reel-studio"
+
 say "Done"
 echo "   Start Reel Studio from the Desktop (or 'Start Reel Studio.command'). Your browser opens and asks for your footage folder."
 echo "   Keep the Terminal window open while you edit."

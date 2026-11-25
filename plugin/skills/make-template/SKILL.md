@@ -5,6 +5,15 @@ description: Turn an inspiration reel (a video the user saved) into a Reel Studi
 
 # Make a template from an inspiration reel
 
+**First, find Reel Studio's folder** (this skill can be used from any folder):
+1. Read the file `.reel-studio` in the user's home folder. It holds the folder's path, written by the setup script.
+2. If there is no such file, look for `Reel Studio` in the home folder: a folder holding `studio.py`.
+3. If it's still not found, ask the user. If it isn't installed yet, use **setup-reel-studio** first.
+
+Run every command below from that folder, with its Python:
+- Windows: `.venv\Scripts\python.exe`
+- Mac: `.venv/bin/python`
+
 A template is a beat to cut to: the reel's length, where every cut falls, its sound, and its on-screen words. Their own
 clips then fill the shots. **Copy the original exactly**: same song, same cuts, same words and timing. The user
 only swaps in their footage.

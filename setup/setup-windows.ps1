@@ -108,6 +108,9 @@ if (-not $NoShortcuts) {
     Ok 'Reel Studio is on your Desktop and in the Start menu'
 }
 
+# Remember where Reel Studio lives, so Claude's Reel Studio plugin can find it from any folder
+[IO.File]::WriteAllText((Join-Path $env:USERPROFILE '.reel-studio'), $App)
+
 Say 'Done'
 Write-Host '   Start Reel Studio from its shortcut (or "Start Reel Studio.bat"). Your browser opens and asks for your footage folder.'
 Write-Host '   Keep the black Reel Studio window open while you edit.'

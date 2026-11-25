@@ -8,7 +8,17 @@ description: First-time setup of Reel Studio on this computer (Windows or Mac). 
 The person is probably not a developer. Say what each step does in one plain line. **Ask before installing anything**.
 The scripts install only after a yes.
 
-**Already set up?** If `.venv/` and `collections.json` (or `library.json`) exist, skip to step 4, then step 5.
+## 0. Get the app
+- **Already downloaded?** Check the path in the `.reel-studio` file in the home folder, or a `Reel Studio` folder there
+  holding `studio.py`. If found, use it.
+- **Not downloaded:** suggest `C:\Users\<name>\Reel Studio` (Windows) or `~/Reel Studio` (Mac) and confirm the folder.
+  - If `git` works: `git clone https://github.com/the-watercoooler/reel-studio "<folder>"`.
+  - Otherwise, after a yes, download `https://github.com/the-watercoooler/reel-studio/archive/refs/heads/main.zip`
+    (under 1 MB) and unzip it into that folder.
+
+Run every step below **in that folder**.
+
+**Already set up?** If `.venv/` and `collections.json` (or `library.json`) exist there, skip to step 4, then step 5.
 
 ## 1. Which computer
 - **Windows 10/11**: go on.
@@ -74,5 +84,9 @@ Offer these two, then let them pick:
 - **make-template:** "Got a reel you love? Save it to your computer and I'll copy its song, cuts and words so your clips
   can fill it."
 
-Tell them how to come back: open **Reel Studio** from the desktop. For help, open Claude Code in the Reel Studio folder
-and just ask, e.g. "make a reel from my Goa clips", "make it warmer", "update Reel Studio".
+**Tell them how to come back:**
+- Open **Reel Studio** from the desktop.
+- For help, ask Claude Code from any folder, e.g. "add my Goa clips to Reel Studio", "describe my clips", "copy this
+  reel", "update Reel Studio". The Reel Studio plugin makes this work anywhere.
+- **Auto-updates:** if they want new versions automatically, they type `/plugin`, open **Marketplaces**, pick
+  **reel-studio** and turn on auto-update.

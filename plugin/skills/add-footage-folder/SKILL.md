@@ -5,6 +5,15 @@ description: Add a folder of videos/photos (a trip, an event, a party) to Reel S
 
 # Add a footage folder
 
+**First, find Reel Studio's folder** (this skill can be used from any folder):
+1. Read the file `.reel-studio` in the user's home folder. It holds the folder's path, written by the setup script.
+2. If there is no such file, look for `Reel Studio` in the home folder: a folder holding `studio.py`.
+3. If it's still not found, ask the user. If it isn't installed yet, use **setup-reel-studio** first.
+
+Run every command below from that folder, with its Python:
+- Windows: `.venv\Scripts\python.exe`
+- Mac: `.venv/bin/python`
+
 1. **Ask where the videos are.** Use their words: "Which folder are your videos in? Sub-folders count too."
    - If they're unsure, offer to look in the usual places: Videos, Pictures, Desktop, Downloads, an external drive.
      On a Mac also check `~/Movies`.

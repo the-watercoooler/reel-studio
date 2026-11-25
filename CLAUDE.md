@@ -9,6 +9,13 @@ The person you're helping is probably not a developer. Explain in plain words, a
 downloading anything**.
 
 ## Skills: use these for the common jobs
+They come with the **Reel Studio plugin**:
+- The skills live in `plugin/skills/`.
+- `.claude-plugin/marketplace.json` makes this repo its own plugin source.
+- Install with `claude plugin marketplace add the-watercoooler/reel-studio`, then
+  `claude plugin install reel-studio@reel-studio`.
+- If the plugin isn't installed, read the matching `plugin/skills/<name>/SKILL.md` and follow it.
+
 | Skill | When |
 |---|---|
 | `setup-reel-studio` | first-time setup on a new computer: Python, FFmpeg, packages, shortcut, first folder |
@@ -17,7 +24,11 @@ downloading anything**.
 | `make-template` | turn an inspiration reel they saved into a template: same song, cuts and words |
 | `update-reel-studio` | get the newest version from GitHub |
 
-**Already set up?** If `.venv/` and `collections.json` (or `library.json`) exist here, setup is done.
+**Already set up?** If `.venv/` and `collections.json` (or `library.json`) exist here, setup is done. The setup
+scripts also write this folder's path to `~/.reel-studio`, which is how the skills find it from other folders.
+
+**Editing the skills:** they reach friends on the next push. Friends with auto-update on get them by themselves;
+others when they ask Claude to update.
 
 ## When someone is new
 **Not set up yet:**

@@ -28,20 +28,34 @@ installing or downloading anything.
 - Otherwise download `https://github.com/the-watercoooler/reel-studio/archive/refs/heads/main.zip` (under 1 MB) into
   that folder and unzip it there.
 
-**3. Set it up.** Read `CLAUDE.md` in that folder and follow the **setup-reel-studio** skill
-(`.claude/skills/setup-reel-studio/SKILL.md`):
+**3. Install the Reel Studio plugin.** This gives Claude its Reel Studio skills in every folder from now on: setup,
+add footage, describe clips, copy a reel, update. Run these yourself:
+```
+claude plugin marketplace add the-watercoooler/reel-studio
+claude plugin install reel-studio@reel-studio
+```
+If `claude` isn't a command on this computer (for example in the desktop app), ask the user to type these two lines
+into the chat themselves:
+```
+/plugin marketplace add the-watercoooler/reel-studio
+/plugin install reel-studio@reel-studio
+```
+Claude Code asks them to confirm the new plugin source. That's expected.
+
+**4. Set it up.** New skills may need a restart to show up, so don't wait for them. Read
+`plugin/skills/setup-reel-studio/SKILL.md` in the downloaded folder and follow it:
 - install Python and FFmpeg if missing
 - add their footage folder
 - start Reel Studio in the browser
 
-**4. Make their first reel together.** Don't stop at "it's installed". Walk them through the first reel, step by step.
+**5. Make their first reel together.** Don't stop at "it's installed". Walk them through the first reel, step by step.
 Then offer what's next: describe their clips, or make a template from a reel they like.
 
 ---
 
 ## What a friend sees
 1. Paste the link into Claude Code. Claude explains Reel Studio and asks to set it up.
-2. Say yes. Claude installs what's missing (asking first) and asks where your videos are.
+2. Say yes. Claude adds the Reel Studio plugin, installs what's missing (asking first) and asks where your videos are.
 3. Reel Studio opens in your browser with **My first reel** already filled with your clips. A **Reel Studio** icon is on
    your desktop for next time.
 
