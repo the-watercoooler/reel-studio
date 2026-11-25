@@ -21,7 +21,11 @@ cache/
 # personal notes and one-off scripts
 Feedback.md
 pipeline/
-fonts/
+# fonts: only the bundled free ones are shared (any others you add stay local)
+fonts/*
+!fonts/InstrumentSerif-Regular.ttf
+!fonts/InstrumentSerif-Italic.ttf
+!fonts/OFL.txt
 
 # the private Python environment made by the set-up script
 .venv/
