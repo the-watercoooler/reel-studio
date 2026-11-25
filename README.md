@@ -1,38 +1,49 @@
 # Reel Studio
 
-A small editor that runs on your own computer and turns **your own clips** into Instagram reels cut to the beat, with
-texts, colour looks and 2K/4K export. **Carousel Studio** (at `/carousel`) does the same for 4:5 photo carousels.
+**Turn your own videos into Instagram reels, cut to the beat, on your own computer.** Windows 10/11 and macOS.
 
-Works on **Windows 10/11 and macOS**.
-
-> **Early days.** This is a personal project shared with friends, and setup is meant to be done by **Claude Code** for you.
-> The Mac version is new, so tell us what breaks.
-
-Everything stays on your computer. Reel Studio only *reads* the footage folders you give it. Its previews, reels and
-settings live in its own folder, and none of that is ever uploaded (see `.gitignore`).
+**To start: paste this page's link into [Claude Code](https://claude.com/claude-code).** That's all. Claude explains what
+Reel Studio does, sets it up with you, and helps you make your first reel.
 
 ---
 
-## Set it up with Claude Code (recommended)
+## For Claude Code: someone just pasted this link
 
-1. Install [Claude Code](https://claude.com/claude-code) and open it.
-2. Paste this message:
+The person wants to try Reel Studio. They're probably not technical, so keep every step plain and short, and ask before
+installing or downloading anything.
 
-   > Set up Reel Studio for me from https://github.com/the-watercoooler/reel-studio. Put it in a folder called
-   > "Reel Studio" in my home folder, then follow its CLAUDE.md.
+**1. Introduce it, in about 5 lines, then ask if they'd like to set it up.** What it can do for them:
+- **Make reels from their own clips:** pick a song's beat, drop clips into each shot, add words, colour looks, then
+  export in 2K/4K for Instagram (9:16, 4:5, 1:1 or 16:9).
+- **Copy a reel they love:** from a reel they saved, Claude builds a template with the same song, cuts and words, and
+  their clips fill it.
+- **Find their best clips fast:** Claude looks through a whole trip or event and describes every clip, so they can
+  search "sunset" or "cheers".
+- **Carousels too:** 4:5 photo carousels from photos or video frames.
+- **Private:** everything runs on their computer. Their videos are only read, never uploaded or changed.
 
-3. Claude will:
-   - download it
-   - install Python and FFmpeg if they're missing (asking first)
-   - ask where your videos are
-   - put a **Reel Studio** icon on your desktop
+**2. Get the code** (after they say yes):
+- Folder: a `Reel Studio` folder in their home folder, unless they want another place.
+- If `git` works: `git clone https://github.com/the-watercoooler/reel-studio "<folder>"`.
+- Otherwise download `https://github.com/the-watercoooler/reel-studio/archive/refs/heads/main.zip` (under 1 MB) into
+  that folder and unzip it there.
 
-### For Claude Code: getting the code
-- Put it where the user asked (default: a `Reel Studio` folder in their home folder).
-- If `git` works, run `git clone https://github.com/the-watercoooler/reel-studio "<folder>"`.
-- If not, ask before downloading. Then get `https://github.com/the-watercoooler/reel-studio/archive/refs/heads/main.zip`
-  (under 1 MB) and unzip it there.
-- Then continue in that folder. Its `CLAUDE.md` and the **setup-reel-studio** skill have the steps.
+**3. Set it up.** Read `CLAUDE.md` in that folder and follow the **setup-reel-studio** skill
+(`.claude/skills/setup-reel-studio/SKILL.md`):
+- install Python and FFmpeg if missing
+- add their footage folder
+- start Reel Studio in the browser
+
+**4. Make their first reel together.** Don't stop at "it's installed". Walk them through the first reel, step by step.
+Then offer what's next: describe their clips, or make a template from a reel they like.
+
+---
+
+## What a friend sees
+1. Paste the link into Claude Code. Claude explains Reel Studio and asks to set it up.
+2. Say yes. Claude installs what's missing (asking first) and asks where your videos are.
+3. Reel Studio opens in your browser with **My first reel** already filled with your clips. A **Reel Studio** icon is on
+   your desktop for next time.
 
 ---
 

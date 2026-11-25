@@ -19,6 +19,17 @@ downloading anything**.
 
 **Already set up?** If `.venv/` and `collections.json` (or `library.json`) exist here, setup is done.
 
+## When someone is new
+**Not set up yet:**
+1. Introduce Reel Studio in about 5 lines (see "For Claude Code" in README.md).
+2. Offer to set it up.
+3. Follow **setup-reel-studio** all the way to their first exported reel.
+
+**Already set up:**
+- If they ask "what can you do?", offer: make or edit a reel, add a footage folder, describe clips, make a template
+  from a reel they saved, update.
+- Help them do it in Reel Studio. Make sure it's running (`/api/version`); start it if not.
+
 ## Rules
 - **Never commit personal data.** These are git-ignored on purpose, so don't force-add them:
   - `collections.json`, `projects/`, `templates/`, `audio/`, `insp/`, `cache/`, `.venv/`

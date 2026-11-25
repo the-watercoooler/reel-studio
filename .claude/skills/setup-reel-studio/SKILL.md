@@ -55,13 +55,24 @@ Use the **add-footage-folder** skill. It asks where the videos are and reads tha
   - Mac: `.venv/bin/python studio.py`
 - Check that http://localhost:8777/api/version answers.
 
-## 5. A 5-line tour
-- **📁 menu** (top left): switch folders, or **＋ Add a folder…**.
-- **Click a shot** on the timeline, then a clip on the left. Drag the teal box to pick which part plays.
-- **T** adds a text. Double-click it on the video to type.
-- **🎨** colour looks · **Format** 9:16 / 4:5 / 1:1 / 16:9.
-- **Export reel** saves to a `Reels` folder inside their footage folder.
+## 5. Make the first reel together
+"My first reel" is already open, filled with their clips. Walk them through it one step at a time, waiting for each:
+1. **Watch it:** press ▶ under the preview.
+2. **Swap a shot:** click a shot on the timeline, then click a clip on the left. Drag the teal box to pick which part
+   plays.
+3. **Add words:** press **T**, then double-click the text on the video and type.
+4. **Colour:** click **🎨** and hover the looks; click one to keep it.
+5. **Export:** click **Export reel**. The file lands in a `Reels` folder inside their footage folder. Offer to open it.
 
-Offer the next steps:
-- **describe-clips**: so search finds "sunset" or "cheers".
-- **make-template**: turn a reel they like into a beat to cut to.
+Also mention:
+- the **📁 menu** (top left) for adding another trip or event
+- **Format** (9:16 / 4:5 / 1:1 / 16:9)
+
+## 6. Next steps
+Offer these two, then let them pick:
+- **describe-clips:** "Want me to look through your clips and describe them, so you can search 'sunset' or 'cheers'?"
+- **make-template:** "Got a reel you love? Save it to your computer and I'll copy its song, cuts and words so your clips
+  can fill it."
+
+Tell them how to come back: open **Reel Studio** from the desktop. For help, open Claude Code in the Reel Studio folder
+and just ask, e.g. "make a reel from my Goa clips", "make it warmer", "update Reel Studio".
