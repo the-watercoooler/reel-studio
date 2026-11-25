@@ -23,7 +23,7 @@ installing or downloading anything.
 - **Private:** everything runs on their computer. Their videos are only read, never uploaded or changed.
 
 **2. Get the code** (after they say yes):
-- Folder: a `Reel Studio` folder in their home folder, unless they want another place.
+- Folder: suggest `C:\Users\<name>\Reel Studio` (Windows) or `~/Reel Studio` (Mac), and confirm it with them.
 - If `git` works: `git clone https://github.com/the-watercoooler/reel-studio "<folder>"`.
 - Otherwise download `https://github.com/the-watercoooler/reel-studio/archive/refs/heads/main.zip` (under 1 MB) into
   that folder and unzip it there.
@@ -71,4 +71,5 @@ black window (Windows) or Terminal window (Mac) open while you edit.
 - Ask Claude to **describe your clips**, so search finds "sunset", "cheers" and so on.
 
 ## Updating
-Ask Claude to **update Reel Studio**, or run `git pull` in this folder. Then start it again. An open page shows **Reload now**.
+Ask Claude to **update Reel Studio**. It uses `git pull`, or downloads the newest ZIP if you installed without git, and
+never touches your reels. Then start it again. An open page shows **Reload now**.
