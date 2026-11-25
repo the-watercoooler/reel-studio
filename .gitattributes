@@ -1,0 +1,10 @@
+# Mac / shell scripts must keep Unix line endings; Windows scripts keep Windows ones.
+*.sh       text eol=lf
+*.command  text eol=lf
+*.bat      text eol=crlf
+*.ps1      text eol=crlf
+*.py       text
+*.html     text
+*.md       text
+*.ico      binary
+*.png      binary

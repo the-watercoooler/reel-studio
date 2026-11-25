@@ -29,8 +29,45 @@ PROJECTS = os.path.join(HERE, 'projects')
 AUDIO = os.path.join(HERE, 'audio')
 INSP = os.path.join(HERE, 'insp')
 THUMBS = os.path.join(ROOT, '_Catalogue files', 'thumbs')
-FD = 'C:\\Windows\\Fonts\\'
 FPS, W, H = 30, 1080, 1920
+IS_WIN, IS_MAC = sys.platform.startswith('win'), sys.platform == 'darwin'
+sys.path.insert(0, HERE)
+import fontfind  # noqa: E402  (fonts by Windows name; Mac stand-ins)
+
+
+def find_ffmpeg():
+    """FFmpeg must be callable as 'ffmpeg'. A double-clicked launcher may not see where Homebrew or winget put it,
+    so look in the usual places and add the first one found to PATH."""
+    if shutil.which('ffmpeg') and shutil.which('ffprobe'):
+        return shutil.which('ffmpeg')
+    cands = ['/opt/homebrew/bin', '/usr/local/bin', '/opt/local/bin']
+    if IS_WIN:
+        import glob
+        la = os.environ.get('LOCALAPPDATA', '')
+        cands = [os.path.join(la, 'Microsoft', 'WinGet', 'Links')] + sorted(
+            glob.glob(os.path.join(la, 'Microsoft', 'WinGet', 'Packages', '*FFmpeg*', '*', 'bin')), reverse=True) + [
+            r'C:\ffmpeg\bin', os.path.join(os.environ.get('ProgramFiles', r'C:\Program Files'), 'ffmpeg', 'bin')]
+    for d in cands:
+        if os.path.exists(os.path.join(d, 'ffmpeg.exe' if IS_WIN else 'ffmpeg')):
+            os.environ['PATH'] = d + os.pathsep + os.environ.get('PATH', '')
+            return os.path.join(d, 'ffmpeg')
+    return None
+
+
+def open_in_files(path, select=False):
+    """Show a folder (or a file, selected) in Explorer / Finder."""
+    try:
+        if IS_WIN:
+            subprocess.Popen(['explorer', '/select,', path]) if select else os.startfile(path)
+        elif IS_MAC:
+            subprocess.Popen(['open', '-R', path] if select else ['open', path])
+        else:
+            subprocess.Popen(['xdg-open', os.path.dirname(path) if select else path])
+    except Exception as e:
+        print('could not open', path, e, flush=True)
+
+
+find_ffmpeg()
 PORT = int(sys.argv[sys.argv.index('--port') + 1]) if '--port' in sys.argv else 8777
 CODE_FILE = os.path.abspath(__file__)
 CODE_MTIME = os.path.getmtime(CODE_FILE)
@@ -162,21 +199,14 @@ _text_lock = threading.Lock()
 
 
 def F(name, size):
-    k = (name, size)
-    if k not in _fonts:
-        fn, _, inst = name.partition('#')
-        f = ImageFont.truetype(FD + fn, size)
-        if inst:
-            try:
-                f.set_variation_by_name(inst)
-            except Exception:
-                pass
-        _fonts[k] = f
-    return _fonts[k]
+    """A font by its Windows file name ('file.ttf' or 'file.ttf#Variable Instance'); on a Mac the closest Mac font."""
+    return fontfind.load(name, size)
 
 
 def text_img(text, font, size, fill, xscale=1.0, emoji_font=None, track=0.0):
     """Single line of text (+ colour emoji runs) as a tight RGBA image. track = letter spacing as a share of the size."""
+    if emoji_font and not fontfind.available(emoji_font):
+        emoji_font = None                        # no colour-emoji font here (e.g. a Mac): emoji use the text font
     if track:
         f = F(font, size)
         gap = size * track
@@ -258,7 +288,7 @@ def line_img(line, st, size, xs, col=None):
     if not line.strip():
         return None
     if st.get('engine') == 'drawtext':
-        return drawtext_img(line, FD + st['font'], size, xs, ('0x' + col[1:]) if col else 'white')
+        return drawtext_img(line, fontfind.path(st['font']), size, xs, ('0x' + col[1:]) if col else 'white')
     if st.get('track'):
         return text_img(line, st['font'], size, hex_rgba(col) if col else st['fill'], xs, None, st['track'])
     return text_img(line, st['font'], size, hex_rgba(col) if col else st['fill'], xs, 'seguiemj.ttf')
@@ -1221,12 +1251,12 @@ def coll_thumb(cid, k):
     return os.path.join(CTHUMBS, f'{cid:04d}_{k:02d}.jpg')
 
 
-def read_clip_list(root):
-    """Descriptions from a "_Clip list.csv" (or "Clip list.csv") at the top of the folder: file name -> (text, tags)."""
+def read_clip_list(root, key=None):
+    """Descriptions from a "_Clip list.csv" (or "Clip list.csv") at the top of the folder - or, when the user prefers
+    nothing written into their footage folder, from cache\\notes\\<key>.csv: file name -> (text, tags)."""
     import csv
     out = {}
-    for name in ('_Clip list.csv', 'Clip list.csv'):
-        fp = os.path.join(root, name)
+    for fp in [os.path.join(root, n) for n in ('_Clip list.csv', 'Clip list.csv')] + ([os.path.join(CACHE, 'notes', f'{key}.csv')] if key else []):
         if not os.path.exists(fp):
             continue
         try:
@@ -1252,7 +1282,7 @@ def guess_tags(text, folder):
 def probe_video(path):
     r = subprocess.run(['ffprobe', '-v', 'error', '-select_streams', 'v:0', '-show_entries',
                         'stream=width,height,r_frame_rate:stream_side_data=rotation:stream_tags=rotate:format=duration',
-                        '-of', 'json', path], capture_output=True, text=True, creationflags=LOW)
+                        '-of', 'json', path], capture_output=True, text=True, encoding='utf-8', errors='replace', creationflags=LOW)
     j = json.loads(r.stdout or '{}')
     s = (j.get('streams') or [{}])[0]
     w, h = int(s.get('width', 0)), int(s.get('height', 0))
@@ -1308,14 +1338,16 @@ def scan_collection(key, prog=None):
         old = {}
     nxt = max([e['id'] for e in old.values()], default=C['base'] - 1) + 1
     files = []
+    out_dir = os.path.normcase(os.path.normpath(C.get('out') or ''))          # exported reels are not footage
     for dp, dns, fns in os.walk(root):
         rel_dir = os.path.relpath(dp, root)
         dns[:] = sorted(d for d in dns if not d.startswith(('_', '.')) and d.lower() not in skip
-                        and os.path.normpath(os.path.join(rel_dir, d)).lower() not in skip)
+                        and os.path.normpath(os.path.join(rel_dir, d)).lower() not in skip
+                        and os.path.normcase(os.path.normpath(os.path.join(dp, d))) != out_dir)
         for fn in sorted(fns):
             if fn.lower().endswith(VIDEO_EXT + PHOTO_EXT) and not fn.startswith(('~', '.')):
                 files.append(os.path.normpath(os.path.join(rel_dir, fn)))
-    notes = read_clip_list(root)
+    notes = read_clip_list(root, key)
     items = []
     for i, rel in enumerate(files):
         p = rel.replace(os.sep, '/')
@@ -1353,6 +1385,9 @@ def scan_collection(key, prog=None):
                 fp = coll_thumb(cid, k)
                 if os.path.exists(fp):
                     os.remove(fp)
+        note = notes.get(e['f'].lower())                       # descriptions can be written or improved later
+        if note and note[0] and note[0] != e.get('s'):
+            e['s'], e['t'] = note[0], guess_tags(note[0] + ' ' + note[1], e['l'])
         if e.get('kind') != 'photo':
             make_coll_thumbs(e, root)
         items.append(e)
@@ -2276,8 +2311,22 @@ class Handler(http.server.BaseHTTPRequestHandler):
                         n += 1
                 return self.send_json({'ok': True, 'queued': n})
             if path == '/api/open-folder':
-                os.startfile(JOB.get('dir') or REELS)
+                d = JOB.get('dir') or REELS
+                os.makedirs(d, exist_ok=True)
+                open_in_files(d)
                 return self.send_json({'ok': True})
+            if path == '/api/collections/rescan':      # re-read a folder (e.g. after its _Clip list.csv changed)
+                key = data.get('key')
+                if key not in COLLS or COLLS[key].get('builtin'):
+                    raise ValueError('unknown folder')
+                if SCAN['state'] == 'running':
+                    raise ValueError('A folder is already being scanned.')
+                SCAN.update(state='running', key=key, name=COLLS[key]['name'], done=0, total=0, msg='', first='')
+                threading.Thread(target=scan_job, args=(key,), daemon=True).start()
+                return self.send_json({'ok': True})
+            if path == '/api/templates/reload':        # pick up new or changed files in templates\
+                load_templates()
+                return self.send_json({'ok': True, 'templates': list(TEMPLATES)})
             if path == '/api/collections/add':
                 key = add_collection(data.get('path'), data.get('name'))
                 return self.send_json({'ok': True, 'key': key})
@@ -2298,9 +2347,9 @@ class Handler(http.server.BaseHTTPRequestHandler):
                 d = carousel_dir(data['name'])
                 if data.get('file'):
                     fp = os.path.join(d, 'photos', os.path.basename(data['file']))
-                    subprocess.Popen(['explorer', '/select,', fp])
+                    open_in_files(fp, select=True)
                 else:
-                    os.startfile(os.path.join(d, 'photos') if data.get('photos') else d)
+                    open_in_files(os.path.join(d, 'photos') if data.get('photos') else d)
                 return self.send_json({'ok': True})
             if path == '/api/quit':                 # a newer Reel Studio is starting and wants this port
                 if JOB['state'] == 'running':
@@ -2327,6 +2376,12 @@ class Server(http.server.ThreadingHTTPServer):
 
 def stop_children():
     """Stop any ffmpeg this server started, so a newer Reel Studio can take over cleanly."""
+    if not IS_WIN:
+        try:
+            subprocess.run(['pkill', '-P', str(os.getpid()), 'ffmpeg'], capture_output=True, timeout=20)
+        except Exception:
+            pass
+        return
     try:
         subprocess.run(['powershell', '-NoProfile', '-Command',
                         f"Get-CimInstance Win32_Process -Filter 'ParentProcessId={os.getpid()}' | "

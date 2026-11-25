@@ -16,7 +16,6 @@ import numpy as np
 from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageOps
 
 W, H = 1080, 1350
-FD = 'C:\\Windows\\Fonts\\'
 _look_rgb, _LOOK = None, {}
 
 
@@ -195,35 +194,20 @@ class Ctx:
 
 
 # ------------------------------------------------------------------ type
-FONT_DIRS = [os.path.join(os.path.dirname(os.path.abspath(__file__)), 'fonts'), FD]   # fonts\ next to this file wins
-_fonts = {}
+import sys as _sys
+_sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import fontfind  # noqa: E402  (fonts\ next to this file wins; on a Mac, the closest Mac fonts)
 
 
 def font_path(name):
-    base = name.split('#')[0]
-    for d in FONT_DIRS:
-        p = os.path.join(d, base)
-        if os.path.exists(p):
-            return p
-    return None
+    f = fontfind.find(name)
+    return f[0] if f else None
 
 
 def font(name, size):
-    """A font by file name; 'file.ttf#Instance' picks a named style of a variable font (e.g. 'bahnschrift.ttf#Bold Condensed')."""
-    size = max(6, int(size))
-    f = _fonts.get((name, size))
-    if f is None:
-        base, _, var = name.partition('#')
-        f = ImageFont.truetype(font_path(base) or FD + 'segoeui.ttf', size)
-        if var:
-            try:
-                f.set_variation_by_name(var)
-            except Exception:
-                pass
-        if len(_fonts) > 800:
-            _fonts.clear()
-        _fonts[(name, size)] = f
-    return f
+    """A font by its Windows file name; 'file.ttf#Instance' picks a named style of a variable font (e.g.
+    'bahnschrift.ttf#Bold Condensed'). Other systems get the closest font they have (see fontfind.py)."""
+    return fontfind.load(name, size)
 
 
 def text_size(t, f, track=0):

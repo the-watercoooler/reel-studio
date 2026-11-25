@@ -23,6 +23,9 @@ Feedback.md
 pipeline/
 fonts/
 
+# the private Python environment made by the set-up script
+.venv/
+
 # Python / editor noise
 __pycache__/
 *.pyc
