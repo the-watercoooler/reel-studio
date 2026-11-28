@@ -2154,7 +2154,9 @@ window.addEventListener('beforeunload', () => { if (S.p) navigator.sendBeacon &&
     if (!S.projects.length) { showWelcome(); return; }        // a brand-new copy: ask for the first footage folder
     buildLibFilters(); warmStatus();
     let last = null; try { last = localStorage.getItem('rs-last'); } catch (e) {}
-    const p = S.projects.find(x => x.id === last) || S.projects[0];
+    const want = new URLSearchParams(location.search).get('reel');   // ?reel=<id>: Claude just made this reel, open it
+    if (want) history.replaceState(null, '', location.pathname);
+    const p = S.projects.find(x => x.id === want) || S.projects.find(x => x.id === last) || S.projects[0];
     openProject(p);
     $('#busy').remove();
   } catch (e) {

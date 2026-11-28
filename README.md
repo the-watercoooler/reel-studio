@@ -12,18 +12,18 @@ Reel Studio does, sets it up with you, and helps you make your first reel.
 The person wants to try Reel Studio. They're probably not technical, so keep every step plain and short, and ask before
 installing or downloading anything.
 
-**1. Introduce it, in about 5 lines, then ask if they'd like to set it up.** What it can do for them:
-- **Make reels from their own clips:** pick a song's beat, drop clips into each shot, add words, colour looks, then
-  export in 2K/4K for Instagram (9:16, 4:5, 1:1 or 16:9).
-- **Copy a reel they love:** from a reel they saved, Claude builds a template with the same song, cuts and words, and
-  their clips fill it.
-- **Find their best clips fast:** Claude looks through a whole trip or event and describes every clip, so they can
-  search "sunset" or "cheers".
-- **Tidy a messy folder:** Claude sorts a camera dump into folders by moment or place (and portrait/landscape if
-  they like), only after they say yes, and can undo it.
-- **Carousels too:** 4:5 photo carousels from photos or video frames.
-- **Private:** everything runs on their computer. Their videos are never uploaded; files only move if they ask
-  Claude to sort them.
+**Start talking right away; don't wait to be asked.** The whole visit is one guided flow. The person shares a
+folder, shares a reel they love, and says which clips. You set things up, build the reel and open it in Reel Studio.
+
+**1. Introduce it in about 5 lines, then ask your first question:** "Shall I set it up? It takes about 5 minutes and I'll
+ask before installing anything." What to say it does:
+- **Copies a reel they love with their own clips:** they save a reel; you match its song, cuts and words, pick
+  their best clips for every shot, and open the finished edit.
+- **Tweak and export:** swap shots, edit words, colour looks, then export in 2K/4K for Instagram.
+- **Sorts and describes footage:** tidies a camera dump into folders (only after a yes) and describes every clip, so
+  they can search "sunset" or "cheers".
+- **Carousels too:** 4:5 photo carousels.
+- **Private:** everything runs on their computer. Videos are never uploaded; files only move if they ask to sort them.
 
 **2. Get the code** (after they say yes):
 - Folder: suggest `C:\Users\<name>\Reel Studio` (Windows) or `~/Reel Studio` (Mac), and confirm it with them.
@@ -31,8 +31,8 @@ installing or downloading anything.
 - Otherwise download `https://github.com/the-watercoooler/reel-studio/archive/refs/heads/main.zip` (under 1 MB) into
   that folder and unzip it there.
 
-**3. Install the Reel Studio plugin.** This gives Claude its Reel Studio skills in every folder from now on: setup,
-sort footage, add footage, describe clips, copy a reel, update. Run these yourself:
+**3. Install the Reel Studio plugin.** This gives Claude its Reel Studio skills in every folder from now on: make a reel,
+setup, sort footage, add footage, describe clips, copy a reel, update. Run these yourself:
 ```
 claude plugin marketplace add the-watercoooler/reel-studio
 claude plugin install reel-studio@reel-studio
@@ -46,21 +46,22 @@ into the chat themselves:
 Claude Code asks them to confirm the new plugin source. That's expected.
 
 **4. Set it up.** New skills may need a restart to show up, so don't wait for them. Read
-`plugin/skills/setup-reel-studio/SKILL.md` in the downloaded folder and follow it:
-- install Python and FFmpeg if missing
-- add their footage folder
-- start Reel Studio in the browser
+`plugin/skills/setup-reel-studio/SKILL.md` in the downloaded folder and follow it: install Python and FFmpeg if
+missing (ask first), add their footage folder, start Reel Studio.
 
-**5. Make their first reel together.** Don't stop at "it's installed". Walk them through the first reel, step by step.
-Then offer what's next: describe their clips, or make a template from a reel they like.
+**5. Make their first reel.** Go straight on with `plugin/skills/make-reel/SKILL.md`, one question at a time:
+1. "Is there a reel you'd love to copy? Save it to your computer and tell me where it is."
+2. "Which clips should I use?"
+3. Build the reel, open it in Reel Studio, and show them how to tweak and export it.
 
 ---
 
 ## What a friend sees
 1. Paste the link into Claude Code. Claude explains Reel Studio and asks to set it up.
 2. Say yes. Claude adds the Reel Studio plugin, installs what's missing (asking first) and asks where your videos are.
-3. Reel Studio opens in your browser with **My first reel** already filled with your clips. A **Reel Studio** icon is on
-   your desktop for next time.
+3. Claude asks for a reel you'd love to copy. Save it to your computer and say where it is.
+4. Claude asks which clips to use, builds the whole reel (every shot, the song, the words) and opens it in Reel Studio.
+5. Watch it, swap any shot, export it for Instagram. A **Reel Studio** icon is on your desktop for next time.
 
 ---
 

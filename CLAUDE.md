@@ -18,6 +18,7 @@ They come with the **Reel Studio plugin**:
 
 | Skill | When |
 |---|---|
+| `make-reel` | **the main flow:** their folder → a reel they love → which clips → Claude builds the reel and opens it |
 | `setup-reel-studio` | first-time setup on a new computer: Python, FFmpeg, packages, shortcut, first folder |
 | `sort-footage` | tidy a messy folder into sub-folders by moment or place, with undo (only after a yes) |
 | `add-footage-folder` | bring in a folder of clips (a trip, an event) |
@@ -35,10 +36,10 @@ others when they ask Claude to update.
 **Not set up yet:**
 1. Introduce Reel Studio in about 5 lines (see "For Claude Code" in README.md).
 2. Offer to set it up.
-3. Follow **setup-reel-studio** all the way to their first exported reel.
+3. Follow **setup-reel-studio**, then **make-reel**, all the way to their first exported reel.
 
 **Already set up:**
-- If they ask "what can you do?", offer: make or edit a reel, sort a messy footage folder, add a footage folder, describe clips, make a template
+- If they ask "what can you do?", offer: make a reel from a reel they love (**make-reel**), edit a reel, sort a messy footage folder, add a footage folder, describe clips, make a template
   from a reel they saved, update.
 - Help them do it in Reel Studio. Make sure it's running (`/api/version`); start it if not.
 
@@ -68,7 +69,7 @@ others when they ask Claude to update.
 | `Blank` (built into `studio.py`) | 15 s, a cut every 45 frames, silent |
 | `fontfind.py` | fonts by Windows file name, with Mac stand-ins; a `fonts/` folder here wins |
 | `setup/` | `setup-windows.ps1`, `setup-mac.sh`, the app icon |
-| `tools/` | `contact_sheets.py` (for describe-clips), `make_template.py` (for make-template), `sort_footage.py` (for sort-footage: plan, apply, undo) |
+| `tools/` | `contact_sheets.py` (for describe-clips), `make_template.py` (for make-template), `sort_footage.py` (for sort-footage: plan, apply, undo), `make_reel.py` (for make-reel: templates, shots, clips, build) |
 
 **Command lines.** Use `.venv`'s Python when it exists:
 - `python studio.py --add-folder "<path>" --name "<name>"`
@@ -79,3 +80,4 @@ others when they ask Claude to update.
 - `POST /api/collections/rescan {"key": …}`
 - `POST /api/templates/reload`
 - `GET /api/version`
+- `POST /api/project` (a whole reel; `tools/make_reel.py build` does this) and open `/?reel=<id>`

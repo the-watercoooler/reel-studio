@@ -65,28 +65,21 @@ Use the **add-footage-folder** skill. It asks where the videos are and reads tha
   - Mac: `.venv/bin/python studio.py`
 - Check that http://localhost:8777/api/version answers.
 
-## 5. Make the first reel together
-"My first reel" is already open, filled with their clips. Walk them through it one step at a time, waiting for each:
-1. **Watch it:** press ▶ under the preview.
-2. **Swap a shot:** click a shot on the timeline, then click a clip on the left. Drag the teal box to pick which part
-   plays.
-3. **Add words:** press **T**, then double-click the text on the video and type.
-4. **Colour:** click **🎨** and hover the looks; click one to keep it.
-5. **Export:** click **Export reel**. The file lands in a `Reels` folder inside their footage folder. Offer to open it.
+## 5. Make their first reel together
+Don't stop at "it's installed". Go straight on with **make-reel** (read `plugin/skills/make-reel/SKILL.md`): their
+folder is already added, so start at its Step 2, the inspiration reel. Claude builds the reel and opens it.
 
-Also mention:
-- the **📁 menu** (top left) for adding another trip or event
-- **Format** (9:16 / 4:5 / 1:1 / 16:9)
+If they'd rather explore by hand first: "My first reel" is already open, filled with their clips. Press ▶ to watch,
+click a shot then a clip to swap it, press **T** for words, **🎨** for colour, **Export reel** to save it. The **📁 menu**
+(top left) adds another trip; **Format** switches 9:16 / 4:5 / 1:1 / 16:9.
 
 ## 6. Next steps
-Offer these two, then let them pick:
-- **describe-clips:** "Want me to look through your clips and describe them, so you can search 'sunset' or 'cheers'?"
-- **make-template:** "Got a reel you love? Save it to your computer and I'll copy its song, cuts and words so your clips
-  can fill it."
+Offer: another reel (**make-reel**), sorting a messy folder (**sort-footage**), or describing clips for search
+(**describe-clips**).
 
 **Tell them how to come back:**
 - Open **Reel Studio** from the desktop.
-- For help, ask Claude Code from any folder, e.g. "add my Goa clips to Reel Studio", "describe my clips", "copy this
+- For help, ask Claude Code from any folder, e.g. "make me a reel from my Goa clips", "sort my footage", "copy this
   reel", "update Reel Studio". The Reel Studio plugin makes this work anywhere.
 - **Auto-updates:** if they want new versions automatically, they type `/plugin`, open **Marketplaces**, pick
   **reel-studio** and turn on auto-update.
