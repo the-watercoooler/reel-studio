@@ -14,6 +14,16 @@ from PIL import ImageFont
 HERE = os.path.dirname(os.path.abspath(__file__))
 BUNDLED = os.path.join(HERE, 'fonts')
 
+# The helper tools in tools\ all import this module and call 'ffmpeg' / 'ffprobe' by name. On a Mac, a shell may not
+# have Homebrew's folder on PATH (and on Windows a fresh winget install may not be on it yet), so add those folders.
+_ff = ['/opt/homebrew/bin', '/usr/local/bin', '/opt/local/bin']
+if sys.platform.startswith('win'):
+    _la = os.environ.get('LOCALAPPDATA', '')
+    _ff = [os.path.join(_la, 'Microsoft', 'WinGet', 'Links')]
+for _d in _ff:
+    if os.path.isdir(_d) and _d not in os.environ.get('PATH', '').split(os.pathsep):
+        os.environ['PATH'] = os.environ.get('PATH', '') + os.pathsep + _d
+
 
 def font_dirs(platform=None):
     p = platform or sys.platform
