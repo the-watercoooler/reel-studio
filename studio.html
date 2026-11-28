@@ -226,7 +226,11 @@ textarea{width:100%;resize:vertical;background:var(--panel2);border:1px solid va
   <aside id="lib">
     <div class="lib-head">
       <select id="colSel" aria-label="Folder" title="Which footage folder the library shows (Europe trip, House Party 02…). ＋ Add a folder… brings in a new one."></select>
-      <input type="search" id="q" placeholder="Search clips: sunset, cat, train, Eiffel…">
+      <div class="row" style="flex-wrap:nowrap">
+        <input type="search" id="q" placeholder="Search clips: sunset, cat, train…" style="flex:1;min-width:0">
+        <button id="filtBtn" class="chip" style="flex:none;min-height:30px;padding:2px 10px" title="Show or hide the filters (place, shape, tags…)" aria-expanded="false">⚙ Filters</button>
+      </div>
+      <div id="libFilters" hidden style="display:flex;flex-direction:column;gap:7px">
       <div class="row">
         <select id="loc" style="flex:1;min-width:0"></select>
         <div class="seg" id="orient"><button data-v="all" aria-pressed="true">All</button><button data-v="portrait" aria-pressed="false" title="Portrait">▯</button><button data-v="landscape" aria-pressed="false" title="Landscape">▭</button></div>
@@ -239,7 +243,8 @@ textarea{width:100%;resize:vertical;background:var(--panel2);border:1px solid va
         <button class="chip tog" id="usedOnly" aria-pressed="false">Used in this reel</button>
         <label class="lbl" style="display:inline-flex;align-items:center;gap:4px"><input type="checkbox" id="autoNext"> Next shot after picking</label>
       </div>
-      <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="lbl" id="libCount"></div>
+      </div>
+      <div class="row" style="justify-content:space-between;flex-wrap:nowrap"><div class="lbl" id="libCount" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></div>
         <button id="warm" class="chip" style="flex:none" title="Make preview copies for every clip in this list in the background, so they play instantly">⚡ Instant previews</button></div>
     </div>
     <div id="libGrid"></div>
@@ -961,7 +966,9 @@ function renderLib() {
   libList = libFiltered();
   const used = usedSet(), cur = S.p.slots[S.sel]?.clip;
   const what = LF.kind === 'photo' ? 'photos' : LF.kind === 'video' ? 'clips' : 'clips & photos';
-  $('#libCount').textContent = `${libList.length.toLocaleString()} ${what} · click to preview · ＋ puts it in shot ${S.sel + 1}`;
+  $('#libCount').textContent = `${libList.length.toLocaleString()} ${what}`;
+  $('#libCount').title = `Click a clip to preview it · ＋ puts it in shot ${S.sel + 1}`;
+  filterBadge();
   const items = libList.slice(0, LF.shown).map((c, i) => {
     const mid = Math.floor((c.n - 1) / 2);
     return `<div class="card ${PV.clip && PV.clip.id === c.id ? 'pv' : ''}" data-i="${i}" draggable="true" title="${esc(c.s)}${c.s ? '\n' : ''}${esc(c.l.replace(/\\/g, ' / '))} · ${esc(c.f)}\nClick to preview · drag onto any shot to replace it · ＋ puts it in shot ${S.sel + 1}">
@@ -972,7 +979,37 @@ function renderLib() {
       <div class="cap">${esc(c.s || c.f)}</div></div>`;
   }).join('');
   $('#libGrid').innerHTML = items + (libList.length > LF.shown ? `<button class="libfoot" id="libMore">Show more (${libList.length - LF.shown} left)</button>`
-    : (libList.length ? '' : `<div class="libfoot">${S.lib.length ? 'No clips match. Try turning off “Long enough”.' : 'No footage yet: choose ＋ Add a folder… in the 📁 menu above.'}</div>`));
+    : (libList.length ? '' : `<div class="libfoot">${emptyHint()}</div>`));
+  const ob = $('#libOther'); if (ob) ob.onclick = () => setCol('all');
+}
+// ---------- filters fold away, so the clips get the room (remembered on this computer)
+function filterCount() {
+  return (LF.loc !== 'all') + (LF.orient !== 'all') + (LF.kind !== 'all') + LF.tags.size + (!LF.fits) + (!LF.hideBad) + LF.usedOnly;
+}
+function filterBadge() {
+  const n = filterCount(), open = !$('#libFilters').hidden;
+  $('#filtBtn').textContent = (open ? '▴ ' : '⚙ ') + 'Filters' + (n ? ` · ${n}` : '');
+  $('#filtBtn').setAttribute('aria-pressed', n ? 'true' : 'false');
+  $('#filtBtn').setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function showFilters(open) {
+  $('#libFilters').hidden = !open; $('#libFilters').style.display = open ? 'flex' : 'none';
+  try { localStorage.setItem('rs-filters', open ? '1' : '0'); } catch (e) {}
+  filterBadge();
+}
+$('#filtBtn').addEventListener('click', () => showFilters($('#libFilters').hidden));
+{ let o = null; try { o = localStorage.getItem('rs-filters'); } catch (e) {} showFilters(o === '1'); }
+function emptyHint() {                          // why nothing shows, and the way out
+  if (!S.lib.length) return 'No footage yet: choose ＋ Add a folder… in the 📁 menu above.';
+  if (LF.col !== 'all') {
+    const keep = LF.col, keepLoc = LF.loc; LF.col = 'all'; LF.loc = 'all';
+    const n = libFiltered().length; LF.col = keep; LF.loc = keepLoc;
+    if (n) {
+      const name = (S.cols || []).find(c => c.key === keep)?.name || 'this folder';
+      return `Nothing here in ${esc(name)}, but ${n.toLocaleString()} in your other folders. <button class="chip" id="libOther">📁 Show all folders</button>`;
+    }
+  }
+  return 'No clips match. Try turning off “Long enough”.';
 }
 function assignClip(c, inPoint, move) {
   const s = S.p.slots[S.sel]; if (!s) return;
