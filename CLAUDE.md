@@ -19,6 +19,7 @@ They come with the **Reel Studio plugin**:
 | Skill | When |
 |---|---|
 | `setup-reel-studio` | first-time setup on a new computer: Python, FFmpeg, packages, shortcut, first folder |
+| `sort-footage` | tidy a messy folder into sub-folders by moment or place, with undo (only after a yes) |
 | `add-footage-folder` | bring in a folder of clips (a trip, an event) |
 | `describe-clips` | look at the clips and write descriptions so search and tags work |
 | `make-template` | turn an inspiration reel they saved into a template: same song, cuts and words |
@@ -37,7 +38,7 @@ others when they ask Claude to update.
 3. Follow **setup-reel-studio** all the way to their first exported reel.
 
 **Already set up:**
-- If they ask "what can you do?", offer: make or edit a reel, add a footage folder, describe clips, make a template
+- If they ask "what can you do?", offer: make or edit a reel, sort a messy footage folder, add a footage folder, describe clips, make a template
   from a reel they saved, update.
 - Help them do it in Reel Studio. Make sure it's running (`/api/version`); start it if not.
 
@@ -67,7 +68,7 @@ others when they ask Claude to update.
 | `Blank` (built into `studio.py`) | 15 s, a cut every 45 frames, silent |
 | `fontfind.py` | fonts by Windows file name, with Mac stand-ins; a `fonts/` folder here wins |
 | `setup/` | `setup-windows.ps1`, `setup-mac.sh`, the app icon |
-| `tools/` | `contact_sheets.py` (for describe-clips), `make_template.py` (for make-template) |
+| `tools/` | `contact_sheets.py` (for describe-clips), `make_template.py` (for make-template), `sort_footage.py` (for sort-footage: plan, apply, undo) |
 
 **Command lines.** Use `.venv`'s Python when it exists:
 - `python studio.py --add-folder "<path>" --name "<name>"`

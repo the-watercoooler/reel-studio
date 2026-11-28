@@ -19,8 +19,11 @@ installing or downloading anything.
   their clips fill it.
 - **Find their best clips fast:** Claude looks through a whole trip or event and describes every clip, so they can
   search "sunset" or "cheers".
+- **Tidy a messy folder:** Claude sorts a camera dump into folders by moment or place (and portrait/landscape if
+  they like), only after they say yes, and can undo it.
 - **Carousels too:** 4:5 photo carousels from photos or video frames.
-- **Private:** everything runs on their computer. Their videos are only read, never uploaded or changed.
+- **Private:** everything runs on their computer. Their videos are never uploaded; files only move if they ask
+  Claude to sort them.
 
 **2. Get the code** (after they say yes):
 - Folder: suggest `C:\Users\<name>\Reel Studio` (Windows) or `~/Reel Studio` (Mac), and confirm it with them.
@@ -29,7 +32,7 @@ installing or downloading anything.
   that folder and unzip it there.
 
 **3. Install the Reel Studio plugin.** This gives Claude its Reel Studio skills in every folder from now on: setup,
-add footage, describe clips, copy a reel, update. Run these yourself:
+sort footage, add footage, describe clips, copy a reel, update. Run these yourself:
 ```
 claude plugin marketplace add the-watercoooler/reel-studio
 claude plugin install reel-studio@reel-studio

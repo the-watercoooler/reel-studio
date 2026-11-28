@@ -1,6 +1,6 @@
 ---
 name: describe-clips
-description: Look at every clip in a Reel Studio footage folder and write a short description of each (what happens, who/what is in it), so the library search and tags work. Use when the user asks to describe, tag, sort or catalogue their clips, or says search doesn't find things.
+description: Look at every clip in a Reel Studio footage folder and write a short description of each (what happens, who/what is in it), so the library search and tags work. Use when the user asks to describe, tag or catalogue their clips (to sort files into folders, use sort-footage), or says search doesn't find things.
 ---
 
 # Describe the clips in a folder

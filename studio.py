@@ -1348,6 +1348,11 @@ def scan_collection(key, prog=None):
             if fn.lower().endswith(VIDEO_EXT + PHOTO_EXT) and not fn.startswith(('~', '.')):
                 files.append(os.path.normpath(os.path.join(rel_dir, fn)))
     notes = read_clip_list(root, key)
+    now = {r.replace(os.sep, '/') for r in files}
+    gone = {}                                                   # files no longer at their old path: maybe moved (sorted)
+    for op, oe in old.items():
+        if op not in now:
+            gone.setdefault((oe.get('f', '').lower(), oe.get('mt')), []).append(oe)
     items = []
     for i, rel in enumerate(files):
         p = rel.replace(os.sep, '/')
@@ -1357,6 +1362,10 @@ def scan_collection(key, prog=None):
         except OSError:
             continue
         e = old.get(p)
+        if e is None and gone.get((os.path.basename(rel).lower(), mt)):
+            e = dict(gone[(os.path.basename(rel).lower(), mt)].pop(0))   # same file, new folder: keep its id, so reels still find it
+            parts = rel.split(os.sep)
+            e.update(p=p, l='\\'.join(parts[:-1]) or C['name'], g=parts[-2] if len(parts) > 1 else C['name'])
         if e is None or e.get('mt') != mt:
             cid = e['id'] if e else nxt
             if not e:
